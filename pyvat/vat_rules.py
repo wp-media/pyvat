@@ -244,7 +244,7 @@ class MtVatRules(ConstantEuVatRateRules):
 
 
 class GbVatRules(ConstantEuVatRateRules):
-    """VAT rules for United Kingdom.
+    """VAT rules for Great Britain.
     """
 
     def get_vat_rate(self, item_type):
