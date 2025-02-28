@@ -264,13 +264,13 @@ EXPECTED_VAT_RATES = {
         ItemType.enewspaper: Decimal(22),
     },
     'SK': {
-        ItemType.generic_physical_good: Decimal(20),
-        ItemType.generic_electronic_service: Decimal(20),
-        ItemType.generic_telecommunications_service: Decimal(20),
-        ItemType.generic_broadcasting_service: Decimal(20),
-        ItemType.prepaid_broadcasting_service: Decimal(20),
-        ItemType.ebook: Decimal(20),
-        ItemType.enewspaper: Decimal(20),
+        ItemType.generic_physical_good: Decimal(23),
+        ItemType.generic_electronic_service: Decimal(23),
+        ItemType.generic_telecommunications_service: Decimal(23),
+        ItemType.generic_broadcasting_service: Decimal(23),
+        ItemType.prepaid_broadcasting_service: Decimal(23),
+        ItemType.ebook: Decimal(23),
+        ItemType.enewspaper: Decimal(23),
     },
 }
 SUPPORTED_ITEM_TYPES = [
