@@ -1,5 +1,6 @@
 import requests
 import xml.dom.minidom
+import os
 
 from requests import Timeout
 
@@ -190,28 +191,40 @@ class HMRCRegistry(Registry):
     Uses the HMRC API for validating VAT numbers.
     """
 
-    CHECK_VAT_SERVICE_URL = 'https://api.service.hmrc.gov.uk/organisations/' \
-                            'vat/check-vat-number/lookup/'
-    CHECK_VAT_SERVICE_TEST_URL = 'https://test-api.service.hmrc.gov.uk/organisations/' \
-                                 'vat/check-vat-number/lookup/'
+    CHECK_VAT_SERVICE_URL = 'https://api.service.hmrc.gov.uk'
+    CHECK_VAT_SERVICE_TEST_URL = 'https://test-api.service.hmrc.gov.uk'
     """URL for the VAT checking service.
     """
 
     DEFAULT_TIMEOUT = 8
     """Timeout for the requests."""
 
+    access_token = None
+    """Access token for the API."""
+
     def check_vat_number(self, vat_number, country_code, test):
         # Request information about the VAT number.
         result = VatNumberCheckResult()
         result.is_valid = False
         try:
-            url = self.CHECK_VAT_SERVICE_URL
+            base_url = self.CHECK_VAT_SERVICE_URL
+            if self.access_token is None:
+                self._authenticate(test)
             if test:
-                url = self.CHECK_VAT_SERVICE_TEST_URL
+                base_url = self.CHECK_VAT_SERVICE_TEST_URL
+
+            url = "{0}/organisations/vat/check-vat-number/lookup/".format(base_url)
+            headers = self._authentication_headers()
             response = requests.get(
                 url + vat_number,
-                timeout=self.DEFAULT_TIMEOUT
+                timeout=self.DEFAULT_TIMEOUT,
+                headers=headers
             )
+            if response.status_code == 401:
+                self._authenticate(test)
+                headers = self._authentication_headers()
+                response = requests.get(url + vat_number,
+                                 timeout=self.DEFAULT_TIMEOUT, headers=headers)
         except Timeout as e:
             result.log_lines.append(u'< Request to HMRC registry timed out:'
                                     u' {}'.format(e))
@@ -265,6 +278,35 @@ class HMRCRegistry(Registry):
                 business_address = ', '.join(list(address.values()))
                 result.business_address = business_address
         return result
+
+    def _authenticate(self, test):
+        """Generate the token for the API."""
+        url = self.CHECK_VAT_SERVICE_URL
+        if test:
+            url = self.CHECK_VAT_SERVICE_TEST_URL
+        """Authenticates with the API and gets a token for subsequent requests."""
+        url = "{0}/oauth/token".format(url)
+        data = {
+            "grant_type": "client_credentials",
+            "scope": "read:vat",
+            "client_id": os.environ.get('PYVAT_UK_CLIENT_ID'),
+            "client_secret": os.environ.get('PYVAT_UK_CLIENT_SECRET'),
+        }
+        r = requests.post(url, data=data)
+        if r.ok:
+            response = r.json()
+            self.access_token = response["access_token"]
+        else:
+            raise Exception(r.text)
+
+    def _authentication_headers(self):
+        """Returns authentication headers."""
+        return {
+            "Authorization": "Bearer " + self.access_token,
+            "content-type": "application/json",
+            "Accept": "application/vnd.hmrc.2.0+json",
+            "charset": "UTF-8",
+        }
 
 
 __all__ = ('Registry', 'ViesRegistry', 'HMRCRegistry', )
