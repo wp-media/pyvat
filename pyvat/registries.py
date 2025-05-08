@@ -206,7 +206,7 @@ class HMRCRegistry(Registry):
     """URL for the VAT checking service.
     """
 
-    DEFAULT_TIMEOUT = 8
+    DEFAULT_TIMEOUT = 12
     """Timeout for the requests."""
 
     access_token = None
