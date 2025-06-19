@@ -365,7 +365,7 @@ class EgVatRules():
     def get_vat_rate(self, item_type):
         return Decimal(14)
 
-# VAT rates updates July 1st 2025
+# VAT rates updated July 1st 2025
 VAT_RULES = {
     'AT': AtVatRules(),
     'BE': BeVatRules(21),
