@@ -26,6 +26,15 @@ class Registry(object):
 
         raise NotImplementedError()
 
+class EgyptRegistry(Registry):
+    """
+    Egyptian registry refusing all VAT numbers.
+    """
+
+    def check_vat_number(self, vat_number, country_code, test):
+        result = VatNumberCheckResult()
+        result.is_valid = False
+        return result
 
 class ViesRegistry(Registry):
     """VIES registry.
@@ -309,4 +318,4 @@ class HMRCRegistry(Registry):
         }
 
 
-__all__ = ('Registry', 'ViesRegistry', 'HMRCRegistry', )
+__all__ = ('Registry', 'ViesRegistry', 'HMRCRegistry', 'EgyptRegistry', )

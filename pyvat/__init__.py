@@ -2,7 +2,7 @@ import re
 import pycountry
 from .item_type import ItemType
 from .party import Party
-from .registries import ViesRegistry, HMRCRegistry
+from .registries import ViesRegistry, HMRCRegistry, EgyptRegistry
 from .result import VatNumberCheckResult
 from .vat_charge import VatCharge, VatChargeAction
 from .vat_rules import VAT_RULES
@@ -44,7 +44,7 @@ VAT_NUMBER_EXPRESSIONS = {
     'RO': re.compile(r'^\d{2,10}$'),
     'SE': re.compile(r'^\d{12}$'),
     'SI': re.compile(r'^\d{8}$'),
-    'SK': re.compile(r'^\d{10}$'),
+    'EG': re.compile(r'^\d{9}$'),
 }
 """VAT number expressions.
 
@@ -62,6 +62,10 @@ VIES_REGISTRY = ViesRegistry()
 
 HMRC_REGISTRY = HMRCRegistry()
 """HMRC registry instance.
+"""
+
+EGYPT_REGISTER = EgyptRegistry()
+"""Egypt Registry instance. 
 """
 
 VAT_REGISTRIES = {
@@ -92,6 +96,7 @@ VAT_REGISTRIES = {
     'RO': VIES_REGISTRY,
     'SE': VIES_REGISTRY,
     'SK': VIES_REGISTRY,
+    'SI': VIES_REGISTRY,
     'SI': VIES_REGISTRY,
 }
 """VAT registries.

@@ -349,6 +349,12 @@ class DeVatRules(EuVatRulesMixin):
             return Decimal(7)
         return Decimal(19)
 
+class EgVatRules(EuVatRulesMixin):
+    """VAT rules for Egypt.
+    """
+
+    def get_vat_rate(self, item_type):
+        return Decimal(14)
 
 # VAT rates are based on the report from January 1st, 2020
 # http://ec.europa.eu/taxation_customs/sites/taxation/files/resources/documents/taxation/vat/how_vat_works/rates/vat_rates_en.pdf
@@ -360,7 +366,7 @@ VAT_RULES = {
     'CZ': CzVatRules(21),
     'DE': DeVatRules(),
     'DK': ConstantEuVatRateRules(25),
-    'EE': ConstantEuVatRateRules(20),
+    'EE': ConstantEuVatRateRules(24),
     'EL': ElVatRules(),
     'GR': ElVatRules(),  # Synonymous country code for Greece
     'ES': EsVatRules(),
@@ -382,6 +388,7 @@ VAT_RULES = {
     'SE': SeVatRules(25),
     'SK': ConstantEuVatRateRules(20),
     'SI': ConstantEuVatRateRules(22),
+    'EG': EgVatRules(),
 }
 
 """VAT rules by country.
