@@ -1,50 +1,57 @@
 import re
+
 import pycountry
+
 from .item_type import ItemType
 from .party import Party
 from .registries import ViesRegistry, HMRCRegistry, EgyptRegistry
+
 from .result import VatNumberCheckResult
 from .vat_charge import VatCharge, VatChargeAction
 from .vat_rules import VAT_RULES
 
-__version__ = '1.3.16'
+__version__ = "1.3.18"
 
-WHITESPACE_EXPRESSION = re.compile(r'[\s\-]+')
+
+WHITESPACE_EXPRESSION = re.compile(r"[\s\-]+")
 """Whitespace expression.
 
 Used for cleaning VAT numbers.
 """
 
 VAT_NUMBER_EXPRESSIONS = {
-    'AT': re.compile(r'^U\d{8}$', re.IGNORECASE),
-    'BE': re.compile(r'^\d{9,10}$'),
-    'BG': re.compile(r'^\d{9,10}$'),
-    'CY': re.compile(r'^\d{8}[a-z]$', re.IGNORECASE),
-    'CZ': re.compile(r'^\d{8,10}$'),
-    'DE': re.compile(r'^\d{9}$'),
-    'DK': re.compile(r'^\d{8}$'),
-    'EE': re.compile(r'^\d{9}$'),
-    'ES': re.compile(r'^[\da-z]\d{7}[\da-z]$', re.IGNORECASE),
-    'FI': re.compile(r'^\d{8}$'),
-    'FR': re.compile(r'^[\da-hj-np-z]{2}\d{9}$', re.IGNORECASE),
-    'GB': re.compile(r'^((\d{9})|(\d{12})|(GD\d{3})|(HA\d{3}))$', re.IGNORECASE),
-    'GR': re.compile(r'^\d{9}$'),
-    'HR': re.compile(r'^\d{11}$'),
-    'HU': re.compile(r'^\d{8}$'),
-    'IE': re.compile(r'^((\d{7}[a-z])|(\d[a-z]\d{5}[a-z])|(\d{6,7}[a-z]{2}))$',
-                     re.IGNORECASE),
-    'IT': re.compile(r'^\d{11}$'),
-    'LT': re.compile(r'^((\d{9})|(\d{12}))$'),
-    'LU': re.compile(r'^\d{8}$'),
-    'LV': re.compile(r'^\d{11}$'),
-    'MT': re.compile(r'^\d{8}$'),
-    'NL': re.compile(r'^\d{9}B\d{2}$', re.IGNORECASE),
-    'PL': re.compile(r'^\d{10}$'),
-    'PT': re.compile(r'^\d{9}$'),
-    'RO': re.compile(r'^\d{2,10}$'),
-    'SE': re.compile(r'^\d{12}$'),
-    'SI': re.compile(r'^\d{8}$'),
+    "AT": re.compile(r"^U\d{8}$", re.IGNORECASE),
+    "BE": re.compile(r"^\d{9,10}$"),
+    "BG": re.compile(r"^\d{9,10}$"),
+    "CY": re.compile(r"^\d{8}[a-z]$", re.IGNORECASE),
+    "CZ": re.compile(r"^\d{8,10}$"),
+    "DE": re.compile(r"^\d{9}$"),
+    "DK": re.compile(r"^\d{8}$"),
+    "EE": re.compile(r"^\d{9}$"),
+    "ES": re.compile(r"^[\da-z]\d{7}[\da-z]$", re.IGNORECASE),
+    "FI": re.compile(r"^\d{8}$"),
+    "FR": re.compile(r"^[\da-hj-np-z]{2}\d{9}$", re.IGNORECASE),
+    "GB": re.compile(r"^((\d{9})|(\d{12})|(GD\d{3})|(HA\d{3}))$", re.IGNORECASE),
+    "GR": re.compile(r"^\d{9}$"),
+    "HR": re.compile(r"^\d{11}$"),
+    "HU": re.compile(r"^\d{8}$"),
+    "IE": re.compile(
+        r"^((\d{7}[a-z])|(\d[a-z]\d{5}[a-z])|(\d{6,7}[a-z]{2}))$", re.IGNORECASE
+    ),
+    "IT": re.compile(r"^\d{11}$"),
+    "LT": re.compile(r"^((\d{9})|(\d{12}))$"),
+    "LU": re.compile(r"^\d{8}$"),
+    "LV": re.compile(r"^\d{11}$"),
+    "MT": re.compile(r"^\d{8}$"),
+    "NL": re.compile(r"^\d{9}B\d{2}$", re.IGNORECASE),
+    "PL": re.compile(r"^\d{10}$"),
+    "PT": re.compile(r"^\d{9}$"),
+    "RO": re.compile(r"^\d{2,10}$"),
+    "SE": re.compile(r"^\d{12}$"),
+    "SI": re.compile(r"^\d{8}$"),
+    "SK": re.compile(r"^\d{10}$"),
     'EG': re.compile(r'^\d{9}$'),
+
 }
 """VAT number expressions.
 
@@ -69,35 +76,35 @@ EGYPT_REGISTER = EgyptRegistry()
 """
 
 VAT_REGISTRIES = {
-    'AT': VIES_REGISTRY,
-    'BE': VIES_REGISTRY,
-    'BG': VIES_REGISTRY,
-    'CY': VIES_REGISTRY,
-    'CZ': VIES_REGISTRY,
-    'DE': VIES_REGISTRY,
-    'DK': VIES_REGISTRY,
-    'EE': VIES_REGISTRY,
-    'ES': VIES_REGISTRY,
-    'FI': VIES_REGISTRY,
-    'FR': VIES_REGISTRY,
-    'GB': HMRC_REGISTRY,
-    'GR': VIES_REGISTRY,
-    'HU': VIES_REGISTRY,
-    'HR': VIES_REGISTRY,
-    'IE': VIES_REGISTRY,
-    'IT': VIES_REGISTRY,
-    'LT': VIES_REGISTRY,
-    'LU': VIES_REGISTRY,
-    'LV': VIES_REGISTRY,
-    'MT': VIES_REGISTRY,
-    'NL': VIES_REGISTRY,
-    'PL': VIES_REGISTRY,
-    'PT': VIES_REGISTRY,
-    'RO': VIES_REGISTRY,
-    'SE': VIES_REGISTRY,
-    'SK': VIES_REGISTRY,
-    'SI': VIES_REGISTRY,
-    'SI': VIES_REGISTRY,
+    "AT": VIES_REGISTRY,
+    "BE": VIES_REGISTRY,
+    "BG": VIES_REGISTRY,
+    "CY": VIES_REGISTRY,
+    "CZ": VIES_REGISTRY,
+    "DE": VIES_REGISTRY,
+    "DK": VIES_REGISTRY,
+    "EE": VIES_REGISTRY,
+    "ES": VIES_REGISTRY,
+    "FI": VIES_REGISTRY,
+    "FR": VIES_REGISTRY,
+    "GB": HMRC_REGISTRY,
+    "GR": VIES_REGISTRY,
+    "HU": VIES_REGISTRY,
+    "HR": VIES_REGISTRY,
+    "IE": VIES_REGISTRY,
+    "IT": VIES_REGISTRY,
+    "LT": VIES_REGISTRY,
+    "LU": VIES_REGISTRY,
+    "LV": VIES_REGISTRY,
+    "MT": VIES_REGISTRY,
+    "NL": VIES_REGISTRY,
+    "PL": VIES_REGISTRY,
+    "PT": VIES_REGISTRY,
+    "RO": VIES_REGISTRY,
+    "SE": VIES_REGISTRY,
+    "SK": VIES_REGISTRY,
+    "SI": VIES_REGISTRY,
+    "EG": EGYPT_REGISTER,
 }
 """VAT registries.
 
@@ -119,7 +126,7 @@ def decompose_vat_number(vat_number, country_code=None):
     """
 
     # Clean the VAT number.
-    vat_number = WHITESPACE_EXPRESSION.sub('', vat_number).upper()
+    vat_number = WHITESPACE_EXPRESSION.sub("", vat_number).upper()
 
     # Attempt to determine the country code of the VAT number if possible.
     if not country_code:
@@ -130,8 +137,8 @@ def decompose_vat_number(vat_number, country_code=None):
             return (vat_number, None)
 
         # Non-ISO code used for Greece.
-        if country_code == 'EL':
-            country_code = 'GR'
+        if country_code == "EL":
+            country_code = "GR"
 
         if country_code not in VAT_REGISTRIES:
             try:
@@ -143,7 +150,7 @@ def decompose_vat_number(vat_number, country_code=None):
         vat_number = vat_number[2:]
     elif vat_number[0:2] == country_code:
         vat_number = vat_number[2:]
-    elif country_code == 'GR' and vat_number[0:2] == 'EL':
+    elif country_code == "GR" and vat_number[0:2] == "EL":
         vat_number = vat_number[2:]
 
     return vat_number, country_code
@@ -198,30 +205,29 @@ def check_vat_number(vat_number, country_code=None, test=False):
     # Decompose the VAT number.
     vat_number, country_code = decompose_vat_number(vat_number, country_code)
     if not vat_number or not country_code:
-        return VatNumberCheckResult(False, [
-            '> Unable to decompose VAT number, resulted in %r and %r' %
-            (vat_number, country_code)
-        ])
+        return VatNumberCheckResult(
+            False,
+            [
+                "> Unable to decompose VAT number, resulted in %r and %r"
+                % (vat_number, country_code)
+            ],
+        )
 
     # Test the VAT number format.
     format_result = is_vat_number_format_valid(vat_number, country_code)
     if format_result is not True:
-        return VatNumberCheckResult(format_result, [
-            '> VAT number validation failed: %r' % (format_result)
-        ])
+        return VatNumberCheckResult(
+            format_result, ["> VAT number validation failed: %r" % (format_result)]
+        )
 
     # Attempt to check the VAT number against a registry.
     if country_code not in VAT_REGISTRIES:
         return VatNumberCheckResult()
 
-    return VAT_REGISTRIES[country_code].check_vat_number(vat_number,
-                                                         country_code, test)
+    return VAT_REGISTRIES[country_code].check_vat_number(vat_number, country_code, test)
 
 
-def get_sale_vat_charge(date,
-                        item_type,
-                        buyer,
-                        seller):
+def get_sale_vat_charge(date, item_type, buyer, seller):
     """Get the VAT charge for performing the sale of an item.
 
     Currently only supports determination of the VAT charge for
@@ -240,13 +246,15 @@ def get_sale_vat_charge(date,
 
     # Only telecommunications, broadcasting and electronic services are
     # currently supported.
-    if not item_type.is_electronic_service and \
-            not item_type.is_telecommunications_service and \
-            not item_type.is_broadcasting_service:
+    if (
+        not item_type.is_electronic_service
+        and not item_type.is_telecommunications_service
+        and not item_type.is_broadcasting_service
+    ):
         raise NotImplementedError(
-            'VAT charge determination for items that are not '
-            'telecommunications, broadcasting or electronic services is '
-            'currently not supported'
+            "VAT charge determination for items that are not "
+            "telecommunications, broadcasting or electronic services is "
+            "currently not supported"
         )
 
     # Determine the rules for the countries in which the buyer and seller
@@ -258,34 +266,32 @@ def get_sale_vat_charge(date,
     # VAT rules for selling to the given country.
     if buyer_vat_rules:
         try:
-            return buyer_vat_rules.get_sale_to_country_vat_charge(date,
-                                                                  item_type,
-                                                                  buyer,
-                                                                  seller)
+            return buyer_vat_rules.get_sale_to_country_vat_charge(
+                date, item_type, buyer, seller
+            )
         except NotImplementedError:
             pass
 
     # Fall back to applying VAT rules for selling from the seller's country.
     if seller_vat_rules:
         try:
-            return seller_vat_rules.get_sale_from_country_vat_charge(date,
-                                                                     item_type,
-                                                                     buyer,
-                                                                     seller)
+            return seller_vat_rules.get_sale_from_country_vat_charge(
+                date, item_type, buyer, seller
+            )
         except NotImplementedError:
             pass
 
     # Nothing we can do from here.
     raise NotImplementedError(
-        'cannot determine VAT charge for a sale of item %r between %r and %r' %
-        (item_type, seller, buyer)
+        "cannot determine VAT charge for a sale of item %r between %r and %r"
+        % (item_type, seller, buyer)
     )
 
 
 __all__ = (
-    'check_vat_number',
-    'get_sale_vat_charge',
-    'is_vat_number_format_valid',
+    "check_vat_number",
+    "get_sale_vat_charge",
+    "is_vat_number_format_valid",
     ItemType.__name__,
     Party.__name__,
     VatCharge.__name__,

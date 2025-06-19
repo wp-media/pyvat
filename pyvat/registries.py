@@ -190,6 +190,16 @@ class ViesRegistry(Registry):
             result.business_address = get_text(address_node).strip() or None
         except Exception:
             pass
+        
+        # Parse the country code if possible.
+        try:
+            country_code_node = get_first_child_element(
+                check_vat_response_node,
+                'ns2:countryCode'
+            )
+            result.business_country_code = get_text(country_code_node).strip() or None
+        except Exception:
+            pass
 
         return result
 
@@ -205,7 +215,7 @@ class HMRCRegistry(Registry):
     """URL for the VAT checking service.
     """
 
-    DEFAULT_TIMEOUT = 8
+    DEFAULT_TIMEOUT = 12
     """Timeout for the requests."""
 
     access_token = None
