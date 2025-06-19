@@ -349,9 +349,18 @@ class DeVatRules(EuVatRulesMixin):
             return Decimal(7)
         return Decimal(19)
 
-class EgVatRules(EuVatRulesMixin):
+class EgVatRules():
     """VAT rules for Egypt.
     """
+
+    def get_sale_to_country_vat_charge(self,
+                                       date,
+                                       item_type,
+                                       buyer,
+                                       seller):
+        return VatCharge(VatChargeAction.charge,
+                         buyer.country_code,
+                         self.get_vat_rate(item_type))
 
     def get_vat_rate(self, item_type):
         return Decimal(14)
