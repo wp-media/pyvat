@@ -365,8 +365,7 @@ class EgVatRules():
     def get_vat_rate(self, item_type):
         return Decimal(14)
 
-# VAT rates are based on the report from January 1st, 2020
-# http://ec.europa.eu/taxation_customs/sites/taxation/files/resources/documents/taxation/vat/how_vat_works/rates/vat_rates_en.pdf
+# VAT rates updates July 1st 2025
 VAT_RULES = {
     'AT': AtVatRules(),
     'BE': BeVatRules(21),
