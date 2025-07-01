@@ -8,7 +8,7 @@ from pyvat import (
     VatChargeAction,
 )
 from pyvat.countries import EU_COUNTRY_CODES
-from unittest2 import TestCase
+from unittest import TestCase
 
 EXPECTED_VAT_RATES = {
     'AT': {
