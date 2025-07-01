@@ -334,10 +334,99 @@ class EsVatRules(EuVatRulesMixin):
     """VAT rules for Spain.
     """
 
-    def get_vat_rate(self, item_type):
+    # Spanish regions with 0% VAT rate
+    ZERO_VAT_REGIONS = {'CE', 'GC', 'TF', 'ML'}  # Ceuta, Las Palmas, Tenerife, Melilla
+
+    def get_vat_rate(self, item_type, region_code=None):
+        # Check if this is a special region with 0% VAT
+        if region_code in self.ZERO_VAT_REGIONS:
+            return Decimal(0)
+
         if item_type == ItemType.ebook:
             return Decimal(4)
         return Decimal(21)
+
+    def get_sale_to_country_vat_charge(self,
+                                       date,
+                                       item_type,
+                                       buyer,
+                                       seller):
+        # We only support business sellers at this time.
+        if not seller.is_business:
+            raise NotImplementedError(
+                'non-business sellers are currently not supported'
+            )
+
+        # If the seller resides in the same country as the buyer, we charge
+        # VAT regardless of whether the buyer is a business or not. Similarly,
+        # if the buyer is a consumer, we must charge VAT in the buyer's country
+        # of residence.
+        if seller.country_code == buyer.country_code or \
+                (not buyer.is_business and date >= JANUARY_1_2015):
+            return VatCharge(VatChargeAction.charge,
+                             buyer.country_code,
+                             self.get_vat_rate(item_type, buyer.region_code))
+
+        # EU consumers are charged VAT in the seller's country prior to January
+        # 1st, 2015.
+        if not buyer.is_business:
+            # Fall back to the seller's VAT rules for this one.
+            raise NotImplementedError()
+
+        # EU businesses will never be charged VAT but must account for the VAT
+        # by the reverse-charge mechanism.
+        return VatCharge(VatChargeAction.reverse_charge,
+                         buyer.country_code,
+                         0)
+
+    def get_sale_from_country_vat_charge(self,
+                                         date,
+                                         item_type,
+                                         buyer,
+                                         seller):
+        # We only support business sellers at this time.
+        if not seller.is_business:
+            raise NotImplementedError(
+                'non-business sellers are currently not supported'
+            )
+
+        # If the buyer resides outside the EU, we do not have to charge VAT.
+        if buyer.country_code not in EU_COUNTRY_CODES:
+            return VatCharge(VatChargeAction.no_charge, buyer.country_code, 0)
+
+        # Both businesses and consumers are charged VAT in the seller's
+        # country if both seller and buyer reside in the same country.
+        if buyer.country_code == seller.country_code:
+            return VatCharge(VatChargeAction.charge,
+                             seller.country_code,
+                             self.get_vat_rate(item_type, buyer.region_code))
+
+        # Businesses in other EU countries are not charged VAT but are
+        # responsible for accounting for the tax through the reverse-charge
+        # mechanism.
+        if buyer.is_business:
+            return VatCharge(VatChargeAction.reverse_charge,
+                             buyer.country_code,
+                             0)
+
+        # Consumers in other EU countries are charged VAT in their country of
+        # residence after January 1st, 2015. Before this date, you charge VAT
+        # in the country where the company is located.
+        if date >= datetime.date(2015, 1, 1):
+            # When buyer is in Spain, use region-specific rate
+            if buyer.country_code == 'ES':
+                return VatCharge(VatChargeAction.charge,
+                                 buyer.country_code,
+                                 self.get_vat_rate(item_type, buyer.region_code))
+            else:
+                buyer_rules = VAT_RULES[buyer.country_code]
+                return VatCharge(VatChargeAction.charge,
+                                 buyer.country_code,
+                                 buyer_rules.get_vat_rate(item_type))
+        else:
+            return VatCharge(VatChargeAction.charge,
+                             seller.country_code,
+                             self.get_vat_rate(item_type, seller.region_code))
 
 
 class DeVatRules(EuVatRulesMixin):
@@ -348,6 +437,7 @@ class DeVatRules(EuVatRulesMixin):
         if item_type == ItemType.ebook:
             return Decimal(7)
         return Decimal(19)
+
 
 class EgVatRules():
     """VAT rules for Egypt.
@@ -364,6 +454,7 @@ class EgVatRules():
 
     def get_vat_rate(self, item_type):
         return Decimal(14)
+
 
 # VAT rates updated July 1st 2025
 VAT_RULES = {
