@@ -216,7 +216,8 @@ def check_vat_number(vat_number, country_code=None, test=False):
 def get_sale_vat_charge(date,
                         item_type,
                         buyer,
-                        seller):
+                        seller,
+                        postal_code=None):
     """Get the VAT charge for performing the sale of an item.
 
     Currently only supports determination of the VAT charge for
@@ -230,6 +231,8 @@ def get_sale_vat_charge(date,
     :type buyer: Party
     :param seller: Seller.
     :type seller: Party
+    :param postal_code: Postal code of the buyer's location, used for region-specific VAT rates.
+    :type postal_code: str
     :rtype: VatCharge
     """
 
@@ -256,7 +259,8 @@ def get_sale_vat_charge(date,
             return buyer_vat_rules.get_sale_to_country_vat_charge(date,
                                                                   item_type,
                                                                   buyer,
-                                                                  seller)
+                                                                  seller,
+                                                                  postal_code)
         except NotImplementedError:
             pass
 
@@ -266,7 +270,8 @@ def get_sale_vat_charge(date,
             return seller_vat_rules.get_sale_from_country_vat_charge(date,
                                                                      item_type,
                                                                      buyer,
-                                                                     seller)
+                                                                     seller,
+                                                                     postal_code)
         except NotImplementedError:
             pass
 
