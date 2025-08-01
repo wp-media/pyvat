@@ -12,11 +12,13 @@ class VatRules(object):
     """Base VAT rules for a country.
     """
 
-    def get_vat_rate(self, item_type):
+    def get_vat_rate(self, item_type, postal_code=None):
         """Get the VAT rate for an item type.
 
         :param item_type: Item type.
         :type item_type: ItemType
+        :param postal_code: Postal code of the buyer's location, used for region-specific VAT rates.
+        :type postal_code: str
         :returns: the VAT rate in percent.
         :rtype: decimal.Decimal
         """
@@ -27,7 +29,8 @@ class VatRules(object):
                                        date,
                                        item_type,
                                        buyer,
-                                       seller):
+                                       seller,
+                                       postal_code=None):
         """Get the VAT charge for selling an item to a buyer in the country.
 
         :param date: Sale date.
@@ -38,6 +41,8 @@ class VatRules(object):
         :type buyer: Party
         :param seller: Seller.
         :type seller: Party
+        :param postal_code: Postal code of the buyer's location, used for region-specific VAT rates.
+        :type postal_code: str
         :rtype: VatCharge
         :raises NotImplementedError:
             if no explicit rules for selling to the given country from the
@@ -52,7 +57,8 @@ class VatRules(object):
                                          date,
                                          item_type,
                                          buyer,
-                                         seller):
+                                         seller,
+                                         postal_code=None):
         """Get the VAT charge for selling an item as a seller in the country.
 
         :param date: Sale date.
@@ -63,6 +69,8 @@ class VatRules(object):
         :type buyer: Party
         :param seller: Seller.
         :type seller: Party
+        :param postal_code: Postal code of the buyer's location, used for region-specific VAT rates.
+        :type postal_code: str
         :rtype: VatCharge
         :raises NotImplementedError:
             if no rules for selling from the given country to the given country
@@ -80,7 +88,8 @@ class EuVatRulesMixin(object):
                                        date,
                                        item_type,
                                        buyer,
-                                       seller):
+                                       seller,
+                                       postal_code=None):
         # We only support business sellers at this time.
         if not seller.is_business:
             raise NotImplementedError(
@@ -95,7 +104,7 @@ class EuVatRulesMixin(object):
                 (not buyer.is_business and date >= JANUARY_1_2015):
             return VatCharge(VatChargeAction.charge,
                              buyer.country_code,
-                             self.get_vat_rate(item_type))
+                             self.get_vat_rate(item_type, postal_code))
 
         # EU consumers are charged VAT in the seller's country prior to January
         # 1st, 2015.
@@ -113,7 +122,8 @@ class EuVatRulesMixin(object):
                                          date,
                                          item_type,
                                          buyer,
-                                         seller):
+                                         seller,
+                                         postal_code=None):
         # We only support business sellers at this time.
         if not seller.is_business:
             raise NotImplementedError(
@@ -129,7 +139,7 @@ class EuVatRulesMixin(object):
         if buyer.country_code == seller.country_code:
             return VatCharge(VatChargeAction.charge,
                              seller.country_code,
-                             self.get_vat_rate(item_type))
+                             self.get_vat_rate(item_type, postal_code))
 
         # Businesses in other EU countries are not charged VAT but are
         # responsible for accounting for the tax through the reverse-charge
@@ -147,11 +157,11 @@ class EuVatRulesMixin(object):
 
             return VatCharge(VatChargeAction.charge,
                              buyer.country_code,
-                             buyer_rules.get_vat_rate(item_type))
+                             buyer_rules.get_vat_rate(item_type, postal_code))
         else:
             return VatCharge(VatChargeAction.charge,
                              seller.country_code,
-                             self.get_vat_rate(item_type))
+                             self.get_vat_rate(item_type, postal_code))
 
 
 class ConstantEuVatRateRules(EuVatRulesMixin):
@@ -161,7 +171,7 @@ class ConstantEuVatRateRules(EuVatRulesMixin):
     def __init__(self, vat_rate):
         self.vat_rate = ensure_decimal(vat_rate)
 
-    def get_vat_rate(self, item_type):
+    def get_vat_rate(self, item_type, postal_code=None):
         return self.vat_rate
 
 
@@ -169,7 +179,7 @@ class AtVatRules(EuVatRulesMixin):
     """VAT rules for Austria.
     """
 
-    def get_vat_rate(self, item_type):
+    def get_vat_rate(self, item_type, postal_code=None):
         if item_type == ItemType.prepaid_broadcasting_service:
             return Decimal(10)
         elif item_type == ItemType.ebook:
@@ -181,114 +191,105 @@ class CzVatRules(ConstantEuVatRateRules):
     """VAT rules for Czech Republic.
     """
 
-    def get_vat_rate(self, item_type):
+    def get_vat_rate(self, item_type, postal_code=None):
         if item_type == ItemType.ebook:
             return Decimal(10)
-
-        return super(CzVatRules, self).get_vat_rate(item_type)
+        return super(CzVatRules, self).get_vat_rate(item_type, postal_code)
 
 
 class BeVatRules(ConstantEuVatRateRules):
     """VAT rules for Belgium.
     """
 
-    def get_vat_rate(self, item_type):
+    def get_vat_rate(self, item_type, postal_code=None):
         if item_type == ItemType.ebook:
             return Decimal(6)
-
-        return super(BeVatRules, self).get_vat_rate(item_type)
+        return super(BeVatRules, self).get_vat_rate(item_type, postal_code)
 
 
 class IeVatRules(ConstantEuVatRateRules):
     """VAT rules for Ireland.
     """
 
-    def get_vat_rate(self, item_type):
+    def get_vat_rate(self, item_type, postal_code=None):
         if item_type == ItemType.ebook:
             return Decimal(9)
-
-        return super(IeVatRules, self).get_vat_rate(item_type)
+        return super(IeVatRules, self).get_vat_rate(item_type, postal_code)
 
 
 class FiVatRules(ConstantEuVatRateRules):
     """VAT rules for  Finland.
     """
 
-    def get_vat_rate(self, item_type):
+    def get_vat_rate(self, item_type, postal_code=None):
         if item_type == ItemType.ebook:
             return Decimal(10)
-
-        return super(FiVatRules, self).get_vat_rate(item_type)
+        return super(FiVatRules, self).get_vat_rate(item_type, postal_code)
 
 
 class NlVatRules(ConstantEuVatRateRules):
     """VAT rules for Netherlands.
     """
 
-    def get_vat_rate(self, item_type):
+    def get_vat_rate(self, item_type, postal_code=None):
         if item_type == ItemType.ebook:
             return Decimal(9)
-
-        return super(NlVatRules, self).get_vat_rate(item_type)
+        return super(NlVatRules, self).get_vat_rate(item_type, postal_code)
 
 
 class MtVatRules(ConstantEuVatRateRules):
     """VAT rules for Malta.
     """
 
-    def get_vat_rate(self, item_type):
+    def get_vat_rate(self, item_type, postal_code=None):
         if item_type == ItemType.ebook:
             return Decimal(5)
-
-        return super(MtVatRules, self).get_vat_rate(item_type)
+        return super(MtVatRules, self).get_vat_rate(item_type, postal_code)
 
 
 class GbVatRules(ConstantEuVatRateRules):
     """VAT rules for Great Britain.
     """
 
-    def get_vat_rate(self, item_type):
-        return super(GbVatRules, self).get_vat_rate(item_type)
+    def get_vat_rate(self, item_type, postal_code=None):
+        return super(GbVatRules, self).get_vat_rate(item_type, postal_code)
 
 
 class SeVatRules(ConstantEuVatRateRules):
     """VAT rules for Sweden.
     """
 
-    def get_vat_rate(self, item_type):
+    def get_vat_rate(self, item_type, postal_code=None):
         if item_type == ItemType.ebook:
             return Decimal(6)
-
-        return super(SeVatRules, self).get_vat_rate(item_type)
+        return super(SeVatRules, self).get_vat_rate(item_type, postal_code)
 
 
 class HrVatRules(ConstantEuVatRateRules):
     """VAT rules for Croatia.
     """
 
-    def get_vat_rate(self, item_type):
+    def get_vat_rate(self, item_type, postal_code=None):
         if item_type == ItemType.ebook:
             return Decimal(5)
-
-        return super(HrVatRules, self).get_vat_rate(item_type)
+        return super(HrVatRules, self).get_vat_rate(item_type, postal_code)
 
 
 class PtVatRules(ConstantEuVatRateRules):
     """VAT rules for Portugal.
     """
 
-    def get_vat_rate(self, item_type):
+    def get_vat_rate(self, item_type, postal_code=None):
         if item_type == ItemType.ebook:
             return Decimal(6)
-
-        return super(PtVatRules, self).get_vat_rate(item_type)
+        return super(PtVatRules, self).get_vat_rate(item_type, postal_code)
 
 
 class FrVatRules(EuVatRulesMixin):
     """VAT rules for France.
     """
 
-    def get_vat_rate(self, item_type):
+    def get_vat_rate(self, item_type, postal_code=None):
         if item_type.is_broadcasting_service:
             return Decimal(10)
         if item_type == ItemType.ebook:
@@ -302,7 +303,7 @@ class ElVatRules(EuVatRulesMixin):
     """VAT rules for Greece.
     """
 
-    def get_vat_rate(self, item_type):
+    def get_vat_rate(self, item_type, postal_code=None):
         return Decimal(24)
 
 
@@ -310,7 +311,7 @@ class LuVatRules(EuVatRulesMixin):
     """VAT rules for Luxembourg.
     """
 
-    def get_vat_rate(self, item_type):
+    def get_vat_rate(self, item_type, postal_code=None):
         if item_type.is_broadcasting_service:
             return Decimal(3)
         elif item_type == ItemType.ebook:
@@ -322,7 +323,7 @@ class PlVatRules(EuVatRulesMixin):
     """VAT rules for Poland.
     """
 
-    def get_vat_rate(self, item_type):
+    def get_vat_rate(self, item_type, postal_code=None):
         if item_type.is_broadcasting_service:
             return Decimal(8)
         if item_type == ItemType.ebook:
@@ -332,9 +333,25 @@ class PlVatRules(EuVatRulesMixin):
 
 class EsVatRules(EuVatRulesMixin):
     """VAT rules for Spain.
+    
+    Special VAT rules apply to certain regions:
+    - Ceuta (postal codes starting with 51): 0% VAT
+    - Melilla (postal codes starting with 52): 0% VAT
+    - Las Palmas (postal codes starting with 35): 0% VAT
+    - Tenerife (postal codes starting with 38): 0% VAT
     """
 
-    def get_vat_rate(self, item_type):
+    def get_vat_rate(self, item_type, postal_code=None):
+        # Check if the postal code is for a region with 0% VAT
+        if postal_code:
+            # Convert to string in case it's passed as a number
+            postal_code = str(postal_code)
+            
+            # Ceuta (51XXX), Melilla (52XXX), Las Palmas (35XXX), Tenerife (38XXX)
+            if postal_code.startswith(('51', '52', '35', '38')):
+                return Decimal(0)
+        
+        # Standard VAT rates for Spain
         if item_type == ItemType.ebook:
             return Decimal(4)
         return Decimal(21)
@@ -344,7 +361,7 @@ class DeVatRules(EuVatRulesMixin):
     """VAT rules for Germany.
     """
 
-    def get_vat_rate(self, item_type):
+    def get_vat_rate(self, item_type, postal_code=None):
         if item_type == ItemType.ebook:
             return Decimal(7)
         return Decimal(19)

@@ -227,7 +227,11 @@ def check_vat_number(vat_number, country_code=None, test=False):
     return VAT_REGISTRIES[country_code].check_vat_number(vat_number, country_code, test)
 
 
-def get_sale_vat_charge(date, item_type, buyer, seller):
+def get_sale_vat_charge(date,
+                        item_type,
+                        buyer,
+                        seller,
+                        postal_code=None):
     """Get the VAT charge for performing the sale of an item.
 
     Currently only supports determination of the VAT charge for
@@ -241,6 +245,8 @@ def get_sale_vat_charge(date, item_type, buyer, seller):
     :type buyer: Party
     :param seller: Seller.
     :type seller: Party
+    :param postal_code: Postal code of the buyer's location, used for region-specific VAT rates.
+    :type postal_code: str
     :rtype: VatCharge
     """
 
@@ -266,18 +272,22 @@ def get_sale_vat_charge(date, item_type, buyer, seller):
     # VAT rules for selling to the given country.
     if buyer_vat_rules:
         try:
-            return buyer_vat_rules.get_sale_to_country_vat_charge(
-                date, item_type, buyer, seller
-            )
+            return buyer_vat_rules.get_sale_to_country_vat_charge(date,
+                                                                  item_type,
+                                                                  buyer,
+                                                                  seller,
+                                                                  postal_code)
         except NotImplementedError:
             pass
 
     # Fall back to applying VAT rules for selling from the seller's country.
     if seller_vat_rules:
         try:
-            return seller_vat_rules.get_sale_from_country_vat_charge(
-                date, item_type, buyer, seller
-            )
+            return seller_vat_rules.get_sale_from_country_vat_charge(date,
+                                                                     item_type,
+                                                                     buyer,
+                                                                     seller,
+                                                                     postal_code)
         except NotImplementedError:
             pass
 

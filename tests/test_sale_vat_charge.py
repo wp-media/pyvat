@@ -8,7 +8,10 @@ from pyvat import (
     VatChargeAction,
 )
 from pyvat.countries import EU_COUNTRY_CODES
-from unittest2 import TestCase
+try:
+    from unittest2 import TestCase
+except ImportError:
+    from unittest import TestCase
 
 EXPECTED_VAT_RATES = {
     'AT': {
@@ -125,7 +128,7 @@ EXPECTED_VAT_RATES = {
         ItemType.generic_telecommunications_service: Decimal(20),
         ItemType.generic_broadcasting_service: Decimal(20),
         ItemType.prepaid_broadcasting_service: Decimal(20),
-        ItemType.ebook: Decimal(0),
+        ItemType.ebook: Decimal(20),
         ItemType.enewspaper: Decimal(20),
     },
     'GR': {  # Synonymous for "EL" -- Greece
@@ -156,13 +159,13 @@ EXPECTED_VAT_RATES = {
         ItemType.enewspaper: Decimal(27),
     },
     'IE': {
-        ItemType.generic_physical_good: Decimal(21),
-        ItemType.generic_electronic_service: Decimal(21),
-        ItemType.generic_telecommunications_service: Decimal(21),
-        ItemType.generic_broadcasting_service: Decimal(21),
-        ItemType.prepaid_broadcasting_service: Decimal(21),
+        ItemType.generic_physical_good: Decimal(23),
+        ItemType.generic_electronic_service: Decimal(23),
+        ItemType.generic_telecommunications_service: Decimal(23),
+        ItemType.generic_broadcasting_service: Decimal(23),
+        ItemType.prepaid_broadcasting_service: Decimal(23),
         ItemType.ebook: Decimal(9),
-        ItemType.enewspaper: Decimal(21),
+        ItemType.enewspaper: Decimal(23),
     },
     'IT': {
         ItemType.generic_physical_good: Decimal(22),
@@ -286,7 +289,44 @@ SUPPORTED_ITEM_TYPES = [
 class GetSaleVatChargeTestCase(TestCase):
     """Test case for :func:`get_sale_vat_charge`.
     """
-
+    
+    def test_spanish_regional_vat_rates(self):
+        """Test that Spanish regions with special VAT rules return the correct VAT rate.
+        """
+        # Test regions with 0% VAT
+        special_regions = {
+            '51001': 'Ceuta',
+            '52001': 'Melilla',
+            '35001': 'Las Palmas',
+            '38001': 'Tenerife'
+        }
+        
+        for postal_code, region_name in special_regions.items():
+            for it in SUPPORTED_ITEM_TYPES:
+                vat_charge = get_sale_vat_charge(
+                    datetime.date.today(),
+                    it,
+                    Party(country_code='ES', is_business=False),
+                    Party(country_code='ES', is_business=True),
+                    postal_code=postal_code
+                )
+                self.assertEqual(vat_charge.action, VatChargeAction.charge)
+                self.assertEqual(vat_charge.rate, Decimal(0),
+                                f"Expected 0% VAT for {region_name} (postal code: {postal_code})")
+                self.assertEqual(vat_charge.country_code, 'ES')
+        
+        # Test standard Spanish VAT rates (without special postal codes)
+        for it in SUPPORTED_ITEM_TYPES:
+            vat_charge = get_sale_vat_charge(
+                datetime.date.today(),
+                it,
+                Party(country_code='ES', is_business=False),
+                Party(country_code='ES', is_business=True)
+            )
+            self.assertEqual(vat_charge.action, VatChargeAction.charge)
+            self.assertEqual(vat_charge.rate, EXPECTED_VAT_RATES['ES'][it])
+            self.assertEqual(vat_charge.country_code, 'ES')
+    
     def test_get_sale_vat_charge(self):
         """get_sale_vat_charge(..)
         """
