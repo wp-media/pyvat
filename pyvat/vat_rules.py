@@ -374,7 +374,8 @@ class EgVatRules():
                                        date,
                                        item_type,
                                        buyer,
-                                       seller):
+                                       seller,
+                                       postal_code=None):
         return VatCharge(VatChargeAction.charge,
                          buyer.country_code,
                          self.get_vat_rate(item_type))
