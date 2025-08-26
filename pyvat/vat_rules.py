@@ -410,7 +410,7 @@ VAT_RULES = {
     'NL': NlVatRules(21),
     'PL': PlVatRules(),
     'PT': PtVatRules(23),
-    'RO': ConstantEuVatRateRules(19),
+    'RO': ConstantEuVatRateRules(21),
     'SE': SeVatRules(25),
     'SK': ConstantEuVatRateRules(23),
     'SI': ConstantEuVatRateRules(22),
