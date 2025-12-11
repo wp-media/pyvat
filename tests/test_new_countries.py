@@ -45,7 +45,7 @@ class NewCountriesRegistriesTestCase(TestCase):
             ('EG', 'Egypt', True, 'B2B exempt'),
             ('CH', 'Switzerland', False, 'B2B not exempt'),
             ('CA', 'Canada', True, 'B2B exempt'),
-            ('NO', 'Norway', True, 'B2B exempt'),
+            ('NO', 'Norway', False, 'B2B not exempt'),
             ('MC', 'Monaco', False, 'B2B not exempt'),
             ('RE', 'Réunion (DOM)', False, 'B2B not exempt'),
             ('GP', 'Guadeloupe (DOM)', False, 'B2B not exempt'),

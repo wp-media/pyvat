@@ -128,7 +128,7 @@ Supported Countries
 * Egypt (EG) - 14% VAT, B2B exempt
 * Switzerland (CH) - 8.1% VAT, B2B not exempt
 * Canada (CA) - 0% VAT, B2B exempt
-* Norway (NO) - 25% VAT, B2B exempt
+* Norway (NO) - 25% VAT, B2B not exempt
 * Monaco (MC) - 20% VAT, B2B not exempt
 * French Overseas Departments (RE, GP, MQ) - 8.5% VAT, B2B not exempt
 
