@@ -445,11 +445,11 @@ class NoVatRules(NonEuVatRules):
         super(NoVatRules, self).__init__(25)
 
 
-class MoVatRules(NonEuVatRules):
+class McVatRules(NonEuVatRules):
     """VAT rules for Monaco."""
 
     def __init__(self):
-        super(MoVatRules, self).__init__(20)
+        super(McVatRules, self).__init__(20)
 
 
 class DomVatRules(NonEuVatRules):
@@ -494,7 +494,7 @@ VAT_RULES = {
     'CH': ChVatRules(),
     'CA': CaVatRules(),
     'NO': NoVatRules(),
-    'MC': MoVatRules(),
+    'MC': McVatRules(),
     'RE': DomVatRules(),  # Réunion
     'GP': DomVatRules(),  # Guadeloupe
     'MQ': DomVatRules(),  # Martinique
