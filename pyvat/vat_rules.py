@@ -366,9 +366,21 @@ class DeVatRules(EuVatRulesMixin):
             return Decimal(7)
         return Decimal(19)
 
-class EgVatRules():
-    """VAT rules for Egypt.
+
+class NonEuVatRules(object):
+    """Base class for non-EU countries VAT rules.
+
+    Provides default implementation for countries that charge VAT
+    both when selling TO and FROM the country.
     """
+
+    def __init__(self, vat_rate):
+        """Initialize with a constant VAT rate.
+
+        :param vat_rate: The VAT rate percentage for the country.
+        :type vat_rate: int, float, or Decimal
+        """
+        self.vat_rate = ensure_decimal(vat_rate)
 
     def get_sale_to_country_vat_charge(self,
                                        date,
@@ -376,12 +388,76 @@ class EgVatRules():
                                        buyer,
                                        seller,
                                        postal_code=None):
+        """Get VAT charge when selling TO this country."""
         return VatCharge(VatChargeAction.charge,
                          buyer.country_code,
-                         self.get_vat_rate(item_type))
+                         self.get_vat_rate(item_type, postal_code))
 
-    def get_vat_rate(self, item_type):
-        return Decimal(14)
+    def get_sale_from_country_vat_charge(self,
+                                        date,
+                                        item_type,
+                                        buyer,
+                                        seller,
+                                        postal_code=None):
+        """Get VAT charge when selling FROM this country."""
+        return VatCharge(VatChargeAction.charge,
+                         buyer.country_code,
+                         self.get_vat_rate(item_type, postal_code))
+
+    def get_vat_rate(self, item_type, postal_code=None):
+        """Get the VAT rate for an item type.
+
+        :param item_type: Item type.
+        :type item_type: ItemType
+        :param postal_code: Postal code (for region-specific rates).
+        :type postal_code: str
+        :returns: VAT rate in percent.
+        :rtype: Decimal
+        """
+        return self.vat_rate
+
+
+class EgVatRules(NonEuVatRules):
+    """VAT rules for Egypt."""
+
+    def __init__(self):
+        super(EgVatRules, self).__init__(14)
+
+
+class ChVatRules(NonEuVatRules):
+    """VAT rules for Switzerland."""
+
+    def __init__(self):
+        super(ChVatRules, self).__init__(Decimal('8.1'))
+
+
+class CaVatRules(NonEuVatRules):
+    """VAT rules for Canada."""
+
+    def __init__(self):
+        super(CaVatRules, self).__init__(0)
+
+
+class NoVatRules(NonEuVatRules):
+    """VAT rules for Norway."""
+
+    def __init__(self):
+        super(NoVatRules, self).__init__(25)
+
+
+class MoVatRules(NonEuVatRules):
+    """VAT rules for Monaco."""
+
+    def __init__(self):
+        super(MoVatRules, self).__init__(20)
+
+
+class DomVatRules(NonEuVatRules):
+    """VAT rules for DOM (French Overseas Departments: Réunion, Guadeloupe, Martinique)."""
+
+    def __init__(self):
+        super(DomVatRules, self).__init__(Decimal('8.5'))
+
 
 # VAT rates updated July 1st 2025
 VAT_RULES = {
@@ -415,6 +491,13 @@ VAT_RULES = {
     'SK': ConstantEuVatRateRules(23),
     'SI': ConstantEuVatRateRules(22),
     'EG': EgVatRules(),
+    'CH': ChVatRules(),
+    'CA': CaVatRules(),
+    'NO': NoVatRules(),
+    'MC': MoVatRules(),
+    'RE': DomVatRules(),  # Réunion
+    'GP': DomVatRules(),  # Guadeloupe
+    'MQ': DomVatRules(),  # Martinique
 }
 
 """VAT rules by country.
