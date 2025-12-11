@@ -67,3 +67,69 @@ Usage
 
 
 For more detailed documentation, see the `full pyvat documentation <http://pyvat.readthedocs.org/>`_.
+
+
+Running Tests
+-------------
+
+``pyvat`` uses `pytest <https://pytest.org/>`_ for testing. To run the test suite:
+
+**Install test dependencies:**
+
+.. code-block:: bash
+
+    $ pip install pytest
+
+**Run all tests:**
+
+.. code-block:: bash
+
+    $ python -m pytest tests/ -v
+
+**Run specific test files:**
+
+.. code-block:: bash
+
+    # Test new countries implementation
+    $ python -m pytest tests/test_new_countries.py -v
+
+    # Test VAT charge calculations
+    $ python -m pytest tests/test_sale_vat_charge.py -v
+
+    # Test VAT number validators
+    $ python -m pytest tests/test_validators.py -v
+
+**Run with coverage:**
+
+.. code-block:: bash
+
+    $ pip install pytest-cov
+    $ python -m pytest tests/ --cov=pyvat --cov-report=html
+
+**Test Results:**
+
+The test suite includes:
+
+* **VAT Rules Tests**: Verify correct VAT rates for all supported countries
+* **Registry Tests**: Test B2B exemption logic for different countries
+* **VAT Charge Tests**: Ensure proper VAT calculation for cross-border sales
+* **Validator Tests**: Check VAT number format validation
+
+*Note: Some validator tests that call external VIES API are currently skipped and will be refactored with mocks.*
+
+
+Supported Countries
+-------------------
+
+**EU Countries**: All EU member states with full VIES integration
+
+**Non-EU Countries**:
+
+* Egypt (EG) - 14% VAT, B2B exempt
+* Switzerland (CH) - 8.1% VAT, B2B not exempt
+* Canada (CA) - 0% VAT, B2B exempt
+* Norway (NO) - 25% VAT, B2B exempt
+* Monaco (MC) - 20% VAT, B2B not exempt
+* French Overseas Departments (RE, GP, MQ) - 8.5% VAT, B2B not exempt
+
+
