@@ -428,9 +428,17 @@ class GetSaleVatChargeTestCase(TestCase):
 
         # EU businesses selling to businesses in other EU countries apply the
         # reverse-charge mechanism.
+        # Note: French VAT zone (FR, MC, RE, GP, MQ) is tested separately in
+        # test_french_vat_zone_transactions() and skipped here.
+        french_vat_zone = {'FR', 'MC', 'RE', 'GP', 'MQ'}
+
         for seller_cc in EU_COUNTRY_CODES:
             for buyer_cc in EU_COUNTRY_CODES:
                 if seller_cc == buyer_cc:
+                    continue
+
+                # Skip French VAT zone internal transactions (tested separately)
+                if seller_cc in french_vat_zone and buyer_cc in french_vat_zone:
                     continue
 
                 for it in SUPPORTED_ITEM_TYPES:
@@ -481,9 +489,9 @@ class GetSaleVatChargeTestCase(TestCase):
                         )
 
         # EU businesses selling to customers outside the EU do not charge VAT.
-        # EXCEPTION: Some countries (EG, CH, CA, NO, MC, RE, GP, MQ) require
+        # EXCEPTION: Some countries (EG, CH, CA, NO) require
         # VAT to be charged even when seller is from EU (per government request).
-        COUNTRIES_REQUIRING_VAT = {'EG', 'CH', 'CA', 'NO', 'MC', 'RE', 'GP', 'MQ'}
+        COUNTRIES_REQUIRING_VAT = {'EG', 'CH', 'CA', 'NO'}
 
         for seller_cc in EU_COUNTRY_CODES:
             for buyer_country in pycountry.countries:
@@ -516,3 +524,71 @@ class GetSaleVatChargeTestCase(TestCase):
                                 self.assertEqual(vat_charge.action,
                                                  VatChargeAction.no_charge)
                                 self.assertEqual(vat_charge.rate, Decimal(0))
+    def test_french_vat_zone_transactions(self):
+        """Test VAT charge for France selling to French overseas departments.
+        France (FR) selling to Monaco (MC), Réunion (RE), Guadeloupe (GP), 
+        and Martinique (MQ) should charge VAT at the buyer's country rate,
+        not use reverse charge mechanism (treated as one VAT zone).
+        """
+        test_cases = [
+            # (seller, buyer, expected_rate, description)
+            ('FR', 'MC', Decimal(20), 'France to Monaco'),
+            ('FR', 'RE', Decimal('8.5'), 'France to Réunion'),
+            ('FR', 'GP', Decimal('8.5'), 'France to Guadeloupe'),
+            ('FR', 'MQ', Decimal('8.5'), 'France to Martinique'),
+        ]
+        # Test B2B transactions
+        for seller_cc, buyer_cc, expected_rate, description in test_cases:
+            with self.subTest(scenario=f"B2B: {description}"):
+                vat_charge = get_sale_vat_charge(
+                    datetime.date(2015, 1, 1),
+                    ItemType.generic_electronic_service,
+                    Party(country_code=buyer_cc, is_business=True),
+                    Party(country_code=seller_cc, is_business=True)
+                )
+                # Should charge VAT, NOT reverse charge
+                self.assertEqual(vat_charge.action, VatChargeAction.charge,
+                                f"{description} B2B should charge VAT")
+                self.assertEqual(vat_charge.rate, expected_rate,
+                                f"{description} B2B should charge buyer's rate")
+                self.assertEqual(vat_charge.country_code, buyer_cc,
+                                f"{description} B2B should use buyer's country")
+        # Test B2C transactions (after 2015-01-01)
+        for seller_cc, buyer_cc, expected_rate, description in test_cases:
+            with self.subTest(scenario=f"B2C (2015+): {description}"):
+                vat_charge = get_sale_vat_charge(
+                    datetime.date(2015, 1, 1),
+                    ItemType.generic_electronic_service,
+                    Party(country_code=buyer_cc, is_business=False),
+                    Party(country_code=seller_cc, is_business=True)
+                )
+                # Should charge VAT at buyer's country rate
+                self.assertEqual(vat_charge.action, VatChargeAction.charge,
+                                f"{description} B2C should charge VAT")
+                self.assertEqual(vat_charge.rate, expected_rate,
+                                f"{description} B2C should charge buyer's rate")
+                self.assertEqual(vat_charge.country_code, buyer_cc,
+                                f"{description} B2C should use buyer's country")
+        # Test B2C transactions before 2015-01-01 (should use seller's rate)
+        seller_rates = {
+            'FR': Decimal(20),
+            'MC': Decimal(20),
+            'RE': Decimal('8.5'),
+            'GP': Decimal('8.5'),
+            'MQ': Decimal('8.5'),
+        }
+        for seller_cc, buyer_cc, _, description in test_cases[:4]:  # Just test FR to others
+            with self.subTest(scenario=f"B2C (2014): {description}"):
+                vat_charge = get_sale_vat_charge(
+                    datetime.date(2014, 12, 15),
+                    ItemType.generic_electronic_service,
+                    Party(country_code=buyer_cc, is_business=False),
+                    Party(country_code=seller_cc, is_business=True)
+                )
+                # Before 2015, should charge at seller's rate
+                self.assertEqual(vat_charge.action, VatChargeAction.charge,
+                                f"{description} B2C (2014) should charge VAT")
+                self.assertEqual(vat_charge.rate, seller_rates[seller_cc],
+                                f"{description} B2C (2014) should charge seller's rate")
+                self.assertEqual(vat_charge.country_code, seller_cc,
+                                f"{description} B2C (2014) should use seller's country")

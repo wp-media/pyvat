@@ -70,26 +70,6 @@ class NorwayRegistry(Registry):
         return result
 
 
-class MonacoRegistry(Registry):
-    """
-    Monaco registry refusing all VAT numbers (B2B will not be exempt).
-    """
-
-    def check_vat_number(self, vat_number, country_code, test):
-        result = VatNumberCheckResult()
-        result.is_valid = False
-        return result
-
-
-class DomRegistry(Registry):
-    """
-    DOM (French Overseas Departments) registry refusing all VAT numbers (B2B will not be exempt).
-    """
-
-    def check_vat_number(self, vat_number, country_code, test):
-        result = VatNumberCheckResult()
-        result.is_valid = False
-        return result
 
 class ViesRegistry(Registry):
     """VIES registry.
@@ -383,4 +363,4 @@ class HMRCRegistry(Registry):
         }
 
 
-__all__ = ('Registry', 'ViesRegistry', 'HMRCRegistry', 'EgyptRegistry', 'SwitzerlandRegistry', 'CanadaRegistry', 'NorwayRegistry', 'MonacoRegistry', 'DomRegistry')
+__all__ = ('Registry', 'ViesRegistry', 'HMRCRegistry', 'EgyptRegistry', 'SwitzerlandRegistry', 'CanadaRegistry', 'NorwayRegistry')

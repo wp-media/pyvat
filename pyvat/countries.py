@@ -27,6 +27,10 @@ EU_COUNTRY_CODES = set([
     'SE',  # Sweden.
     'SI',  # Slovenia.
     'SK',  # Slovakia.
+    'MC',  # Monaco (treated as EU with French VAT rules).
+    'RE',  # Réunion (French Overseas Department).
+    'GP',  # Guadeloupe (French Overseas Department).
+    'MQ',  # Martinique (French Overseas Department).
 ])
 """EU country codes.
 

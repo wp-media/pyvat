@@ -96,12 +96,28 @@ class EuVatRulesMixin(object):
                 'non-business sellers are currently not supported'
             )
 
+        # French territories (MC, RE, GP, MQ) are treated as part of France for VAT purposes
+        french_territories = {'FR', 'MC', 'RE', 'GP', 'MQ'}
+        seller_in_french_zone = seller.country_code in french_territories
+        buyer_in_french_zone = buyer.country_code in french_territories
+
         # If the seller resides in the same country as the buyer, we charge
-        # VAT regardless of whether the buyer is a business or not. Similarly,
-        # if the buyer is a consumer, we must charge VAT in the buyer's country
-        # of residence.
-        if seller.country_code == buyer.country_code or \
-                (not buyer.is_business and date >= JANUARY_1_2015):
+        # VAT regardless of whether the buyer is a business or not.
+        if seller.country_code == buyer.country_code:
+            return VatCharge(VatChargeAction.charge,
+                             buyer.country_code,
+                             self.get_vat_rate(item_type, postal_code))
+
+        # French VAT zone: seller in France/territories selling to buyer in France/territories
+        # For B2B or consumers after 2015-01-01, charge buyer's country VAT
+        if seller_in_french_zone and buyer_in_french_zone:
+            if buyer.is_business or date >= JANUARY_1_2015:
+                return VatCharge(VatChargeAction.charge,
+                                 buyer.country_code,
+                                 self.get_vat_rate(item_type, postal_code))
+
+        # Consumers in other EU countries after 2015-01-01 are charged in their country
+        if not buyer.is_business and date >= JANUARY_1_2015:
             return VatCharge(VatChargeAction.charge,
                              buyer.country_code,
                              self.get_vat_rate(item_type, postal_code))
@@ -367,6 +383,7 @@ class DeVatRules(EuVatRulesMixin):
         return Decimal(19)
 
 
+
 class NonEuVatRules(object):
     """Base class for non-EU countries VAT rules.
 
@@ -445,19 +462,6 @@ class NoVatRules(NonEuVatRules):
         super(NoVatRules, self).__init__(25)
 
 
-class McVatRules(NonEuVatRules):
-    """VAT rules for Monaco."""
-
-    def __init__(self):
-        super(McVatRules, self).__init__(20)
-
-
-class DomVatRules(NonEuVatRules):
-    """VAT rules for DOM (French Overseas Departments: Réunion, Guadeloupe, Martinique)."""
-
-    def __init__(self):
-        super(DomVatRules, self).__init__(Decimal('8.5'))
-
 
 # VAT rates updated July 1st 2025
 VAT_RULES = {
@@ -494,10 +498,10 @@ VAT_RULES = {
     'CH': ChVatRules(),
     'CA': CaVatRules(),
     'NO': NoVatRules(),
-    'MC': McVatRules(),
-    'RE': DomVatRules(),  # Réunion
-    'GP': DomVatRules(),  # Guadeloupe
-    'MQ': DomVatRules(),  # Martinique
+    'MC': ConstantEuVatRateRules(20),  # Monaco (French VAT zone)
+    'RE': ConstantEuVatRateRules(Decimal('8.5')),  # Réunion (French overseas department)
+    'GP': ConstantEuVatRateRules(Decimal('8.5')),  # Guadeloupe (French overseas department)
+    'MQ': ConstantEuVatRateRules(Decimal('8.5')),  # Martinique (French overseas department)
 }
 
 """VAT rules by country.

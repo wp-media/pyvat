@@ -40,17 +40,14 @@ class NewCountriesRegistriesTestCase(TestCase):
     """Test case for new countries registries (B2B exemption)."""
 
     def test_b2b_exemption(self):
-        """Test that B2B exemption rules are correctly implemented."""
+        """Test that B2B exemption rules are correctly implemented for non-EU countries."""
         test_cases = [
             ('EG', 'Egypt', True, 'B2B exempt'),
             ('CH', 'Switzerland', False, 'B2B not exempt'),
             ('CA', 'Canada', True, 'B2B exempt'),
             ('NO', 'Norway', False, 'B2B not exempt'),
-            ('MC', 'Monaco', False, 'B2B not exempt'),
-            ('RE', 'Réunion (DOM)', False, 'B2B not exempt'),
-            ('GP', 'Guadeloupe (DOM)', False, 'B2B not exempt'),
-            ('MQ', 'Martinique (DOM)', False, 'B2B not exempt'),
         ]
+        # Note: MC, RE, GP, MQ are now EU countries and use VIES registry
 
         for code, name, expected_valid, description in test_cases:
             with self.subTest(country=name, code=code):

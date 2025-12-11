@@ -4,7 +4,7 @@ import pycountry
 
 from .item_type import ItemType
 from .party import Party
-from .registries import ViesRegistry, HMRCRegistry, EgyptRegistry, SwitzerlandRegistry, CanadaRegistry, NorwayRegistry, MonacoRegistry, DomRegistry
+from .registries import ViesRegistry, HMRCRegistry, EgyptRegistry, SwitzerlandRegistry, CanadaRegistry, NorwayRegistry
 
 from .result import VatNumberCheckResult
 from .vat_charge import VatCharge, VatChargeAction
@@ -86,14 +86,6 @@ NORWAY_REGISTER = NorwayRegistry()
 """Norway Registry instance.
 """
 
-MONACO_REGISTER = MonacoRegistry()
-"""Monaco Registry instance.
-"""
-
-DOM_REGISTER = DomRegistry()
-"""DOM Registry instance.
-"""
-
 VAT_REGISTRIES = {
     "AT": VIES_REGISTRY,
     "BE": VIES_REGISTRY,
@@ -123,14 +115,14 @@ VAT_REGISTRIES = {
     "SE": VIES_REGISTRY,
     "SK": VIES_REGISTRY,
     "SI": VIES_REGISTRY,
+    "MC": VIES_REGISTRY,  # Monaco (French VAT zone)
+    "RE": VIES_REGISTRY,  # Réunion (French overseas department)
+    "GP": VIES_REGISTRY,  # Guadeloupe (French overseas department)
+    "MQ": VIES_REGISTRY,  # Martinique (French overseas department)
     "EG": EGYPT_REGISTER,
     "CH": SWITZERLAND_REGISTER,
     "CA": CANADA_REGISTER,
     "NO": NORWAY_REGISTER,
-    "MC": MONACO_REGISTER,
-    "RE": DOM_REGISTER,
-    "GP": DOM_REGISTER,
-    "MQ": DOM_REGISTER,
 }
 """VAT registries.
 
