@@ -78,13 +78,13 @@ EXPECTED_VAT_RATES = {
         ItemType.enewspaper: Decimal(25),
     },
     'EE': {
-        ItemType.generic_physical_good: Decimal(20),
-        ItemType.generic_electronic_service: Decimal(20),
-        ItemType.generic_telecommunications_service: Decimal(20),
-        ItemType.generic_broadcasting_service: Decimal(20),
-        ItemType.prepaid_broadcasting_service: Decimal(20),
-        ItemType.ebook: Decimal(20),
-        ItemType.enewspaper: Decimal(20),
+        ItemType.generic_physical_good: Decimal(24),
+        ItemType.generic_electronic_service: Decimal(24),
+        ItemType.generic_telecommunications_service: Decimal(24),
+        ItemType.generic_broadcasting_service: Decimal(24),
+        ItemType.prepaid_broadcasting_service: Decimal(24),
+        ItemType.ebook: Decimal(24),
+        ItemType.enewspaper: Decimal(24),
     },
     'ES': {
         ItemType.generic_physical_good: Decimal(21),
@@ -96,13 +96,13 @@ EXPECTED_VAT_RATES = {
         ItemType.enewspaper: Decimal(21),
     },
     'FI': {
-        ItemType.generic_physical_good: Decimal(24),
-        ItemType.generic_electronic_service: Decimal(24),
-        ItemType.generic_telecommunications_service: Decimal(24),
-        ItemType.generic_broadcasting_service: Decimal(24),
-        ItemType.prepaid_broadcasting_service: Decimal(24),
+        ItemType.generic_physical_good: Decimal(25.5),
+        ItemType.generic_electronic_service: Decimal(25.5),
+        ItemType.generic_telecommunications_service: Decimal(25.5),
+        ItemType.generic_broadcasting_service: Decimal(25.5),
+        ItemType.prepaid_broadcasting_service: Decimal(25.5),
         ItemType.ebook: Decimal(10),
-        ItemType.enewspaper: Decimal(24),
+        ItemType.enewspaper: Decimal(25.5),
     },
     'FR': {
         ItemType.generic_physical_good: Decimal(20),
@@ -240,13 +240,13 @@ EXPECTED_VAT_RATES = {
         ItemType.enewspaper: Decimal(23),
     },
     'RO': {
-        ItemType.generic_physical_good: Decimal(19),
-        ItemType.generic_electronic_service: Decimal(19),
-        ItemType.generic_telecommunications_service: Decimal(19),
-        ItemType.generic_broadcasting_service: Decimal(19),
-        ItemType.prepaid_broadcasting_service: Decimal(19),
-        ItemType.ebook: Decimal(19),
-        ItemType.enewspaper: Decimal(19),
+        ItemType.generic_physical_good: Decimal(21),
+        ItemType.generic_electronic_service: Decimal(21),
+        ItemType.generic_telecommunications_service: Decimal(21),
+        ItemType.generic_broadcasting_service: Decimal(21),
+        ItemType.prepaid_broadcasting_service: Decimal(21),
+        ItemType.ebook: Decimal(21),
+        ItemType.enewspaper: Decimal(21),
     },
     'SE': {
         ItemType.generic_physical_good: Decimal(25),
@@ -274,6 +274,79 @@ EXPECTED_VAT_RATES = {
         ItemType.prepaid_broadcasting_service: Decimal(23),
         ItemType.ebook: Decimal(23),
         ItemType.enewspaper: Decimal(23),
+    },
+    # Non-EU countries that require VAT charge
+    'EG': {
+        ItemType.generic_physical_good: Decimal(14),
+        ItemType.generic_electronic_service: Decimal(14),
+        ItemType.generic_telecommunications_service: Decimal(14),
+        ItemType.generic_broadcasting_service: Decimal(14),
+        ItemType.prepaid_broadcasting_service: Decimal(14),
+        ItemType.ebook: Decimal(14),
+        ItemType.enewspaper: Decimal(14),
+    },
+    'CH': {
+        ItemType.generic_physical_good: Decimal('8.1'),
+        ItemType.generic_electronic_service: Decimal('8.1'),
+        ItemType.generic_telecommunications_service: Decimal('8.1'),
+        ItemType.generic_broadcasting_service: Decimal('8.1'),
+        ItemType.prepaid_broadcasting_service: Decimal('8.1'),
+        ItemType.ebook: Decimal('8.1'),
+        ItemType.enewspaper: Decimal('8.1'),
+    },
+    'CA': {
+        ItemType.generic_physical_good: Decimal(0),
+        ItemType.generic_electronic_service: Decimal(0),
+        ItemType.generic_telecommunications_service: Decimal(0),
+        ItemType.generic_broadcasting_service: Decimal(0),
+        ItemType.prepaid_broadcasting_service: Decimal(0),
+        ItemType.ebook: Decimal(0),
+        ItemType.enewspaper: Decimal(0),
+    },
+    'NO': {
+        ItemType.generic_physical_good: Decimal(25),
+        ItemType.generic_electronic_service: Decimal(25),
+        ItemType.generic_telecommunications_service: Decimal(25),
+        ItemType.generic_broadcasting_service: Decimal(25),
+        ItemType.prepaid_broadcasting_service: Decimal(25),
+        ItemType.ebook: Decimal(25),
+        ItemType.enewspaper: Decimal(25),
+    },
+    'MC': {
+        ItemType.generic_physical_good: Decimal(20),
+        ItemType.generic_electronic_service: Decimal(20),
+        ItemType.generic_telecommunications_service: Decimal(20),
+        ItemType.generic_broadcasting_service: Decimal(20),
+        ItemType.prepaid_broadcasting_service: Decimal(20),
+        ItemType.ebook: Decimal(20),
+        ItemType.enewspaper: Decimal(20),
+    },
+    'RE': {
+        ItemType.generic_physical_good: Decimal('8.5'),
+        ItemType.generic_electronic_service: Decimal('8.5'),
+        ItemType.generic_telecommunications_service: Decimal('8.5'),
+        ItemType.generic_broadcasting_service: Decimal('8.5'),
+        ItemType.prepaid_broadcasting_service: Decimal('8.5'),
+        ItemType.ebook: Decimal('8.5'),
+        ItemType.enewspaper: Decimal('8.5'),
+    },
+    'GP': {
+        ItemType.generic_physical_good: Decimal('8.5'),
+        ItemType.generic_electronic_service: Decimal('8.5'),
+        ItemType.generic_telecommunications_service: Decimal('8.5'),
+        ItemType.generic_broadcasting_service: Decimal('8.5'),
+        ItemType.prepaid_broadcasting_service: Decimal('8.5'),
+        ItemType.ebook: Decimal('8.5'),
+        ItemType.enewspaper: Decimal('8.5'),
+    },
+    'MQ': {
+        ItemType.generic_physical_good: Decimal('8.5'),
+        ItemType.generic_electronic_service: Decimal('8.5'),
+        ItemType.generic_telecommunications_service: Decimal('8.5'),
+        ItemType.generic_broadcasting_service: Decimal('8.5'),
+        ItemType.prepaid_broadcasting_service: Decimal('8.5'),
+        ItemType.ebook: Decimal('8.5'),
+        ItemType.enewspaper: Decimal('8.5'),
     },
 }
 SUPPORTED_ITEM_TYPES = [
@@ -408,6 +481,10 @@ class GetSaleVatChargeTestCase(TestCase):
                         )
 
         # EU businesses selling to customers outside the EU do not charge VAT.
+        # EXCEPTION: Some countries (EG, CH, CA, NO, MC, RE, GP, MQ) require
+        # VAT to be charged even when seller is from EU (per government request).
+        COUNTRIES_REQUIRING_VAT = {'EG', 'CH', 'CA', 'NO', 'MC', 'RE', 'GP', 'MQ'}
+
         for seller_cc in EU_COUNTRY_CODES:
             for buyer_country in pycountry.countries:
                 buyer_cc = buyer_country.alpha_2
@@ -425,6 +502,17 @@ class GetSaleVatChargeTestCase(TestCase):
                                       is_business=buyer_is_business),
                                 Party(country_code=seller_cc, is_business=True)
                             )
-                            self.assertEqual(vat_charge.action,
-                                             VatChargeAction.no_charge)
-                            self.assertEqual(vat_charge.rate, Decimal(0))
+
+                            # New countries require VAT charge per government mandate
+                            if buyer_cc in COUNTRIES_REQUIRING_VAT:
+                                self.assertEqual(vat_charge.action,
+                                                 VatChargeAction.charge)
+                                # Verify correct VAT rate is charged
+                                if buyer_cc in EXPECTED_VAT_RATES:
+                                    self.assertEqual(vat_charge.rate,
+                                                     EXPECTED_VAT_RATES[buyer_cc][it])
+                            else:
+                                # Standard behavior: EU doesn't charge VAT to non-EU
+                                self.assertEqual(vat_charge.action,
+                                                 VatChargeAction.no_charge)
+                                self.assertEqual(vat_charge.rate, Decimal(0))
