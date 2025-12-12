@@ -7,7 +7,7 @@ from pyvat import (
     Party,
     VatChargeAction,
 )
-from pyvat.countries import EU_COUNTRY_CODES, FRANCE_COUNTRY_CODES
+from pyvat.countries import EU_COUNTRY_CODES, FRANCE_COUNTRY_CODES, NON_EU_COUNTRY_CODES
 try:
     from unittest2 import TestCase
 except ImportError:
@@ -490,7 +490,6 @@ class GetSaleVatChargeTestCase(TestCase):
         # EU businesses selling to customers outside the EU do not charge VAT.
         # EXCEPTION: Some countries (EG, CH, CA, NO) require
         # VAT to be charged even when seller is from EU (per government request).
-        COUNTRIES_REQUIRING_VAT = {'EG', 'CH', 'CA', 'NO'}
 
         for seller_cc in EU_COUNTRY_CODES:
             for buyer_country in pycountry.countries:
@@ -511,7 +510,7 @@ class GetSaleVatChargeTestCase(TestCase):
                             )
 
                             # New countries require VAT charge per government mandate
-                            if buyer_cc in COUNTRIES_REQUIRING_VAT:
+                            if buyer_cc in NON_EU_COUNTRY_CODES:
                                 self.assertEqual(vat_charge.action,
                                                  VatChargeAction.charge)
                                 # Verify correct VAT rate is charged
@@ -523,6 +522,7 @@ class GetSaleVatChargeTestCase(TestCase):
                                 self.assertEqual(vat_charge.action,
                                                  VatChargeAction.no_charge)
                                 self.assertEqual(vat_charge.rate, Decimal(0))
+
     def test_french_vat_zone_transactions(self):
         """Test VAT charge for France selling to French overseas departments.
         France (FR) selling to Monaco (MC), Réunion (RE), Guadeloupe (GP), 

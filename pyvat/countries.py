@@ -11,6 +11,19 @@ France and its territories are treated as one VAT zone for the purposes of VAT
 calculation. This includes mainland France and various overseas departments.
 """
 
+NON_EU_COUNTRY_CODES = {
+    'EG',  # Egypt.
+    'CH',  # Switzerland.
+    'CA',  # Canada.
+    'NO',  # Norway.
+}
+"""Non-EU country codes that require VAT to be charged.
+
+These countries have requested that VAT be charged on sales from EU sellers,
+contrary to standard international tax law where EU sellers don't charge VAT
+to non-EU buyers.
+"""
+
 EU_COUNTRY_CODES = set([
     'AT',  # Austria.
     'BE',  # Belgium.
