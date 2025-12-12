@@ -122,12 +122,6 @@ class EuVatRulesMixin(object):
                              buyer.country_code,
                              self.get_vat_rate(item_type, postal_code))
 
-        # Consumers in other EU countries after 2015-01-01 are charged in their country
-        if not buyer.is_business and date >= JANUARY_1_2015:
-            return VatCharge(VatChargeAction.charge,
-                             buyer.country_code,
-                             self.get_vat_rate(item_type, postal_code))
-
         # EU consumers are charged VAT in the seller's country prior to January
         # 1st, 2015.
         if not buyer.is_business:
