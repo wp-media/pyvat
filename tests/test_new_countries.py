@@ -1,7 +1,10 @@
 """Test suite for new country VAT rules and registries."""
 
+import datetime
 import pyvat
+from pyvat import get_sale_vat_charge, Party, VatChargeAction
 from pyvat.item_type import ItemType
+from decimal import Decimal
 
 try:
     from unittest2 import TestCase
@@ -59,4 +62,52 @@ class NewCountriesRegistriesTestCase(TestCase):
                     f"{name} ({code}) registry should return is_valid={expected_valid} ({description})"
                 )
 
+
+class NonEuB2BVatChargeTestCase(TestCase):
+    """Test case for non-EU B2B VAT charges."""
+
+    def test_non_eu_b2b_vat_charges(self):
+        """Test that non-EU B2B customers are charged correct VAT rates.
+
+        Unlike EU B2B transactions which use reverse charge, these non-EU countries
+        require VAT to be charged per government mandate, regardless of B2B status.
+        """
+        test_cases = [
+            # (country_code, country_name, expected_vat_rate, description)
+            ('EG', 'Egypt', Decimal('14'), 'B2B exempt - but VAT still charged'),
+            ('CH', 'Switzerland', Decimal('8.1'), 'B2B not exempt - VAT charged'),
+            ('CA', 'Canada', Decimal('0'), 'B2B exempt - but 0% VAT charged'),
+            ('NO', 'Norway', Decimal('25'), 'B2B not exempt - VAT charged'),
+        ]
+
+        for country_code, country_name, expected_rate, description in test_cases:
+            with self.subTest(country=country_name, code=country_code):
+                # Test B2B transaction from EU seller to non-EU buyer
+                vat_charge = get_sale_vat_charge(
+                    datetime.date(2024, 1, 1),
+                    ItemType.generic_electronic_service,
+                    Party(country_code=country_code, is_business=True),  # Non-EU B2B buyer
+                    Party(country_code='FR', is_business=True)  # EU seller
+                )
+
+                # Should charge VAT (not reverse charge or no charge)
+                self.assertEqual(
+                    vat_charge.action,
+                    VatChargeAction.charge,
+                    f"{country_name} B2B should be charged VAT (not reverse charge) - {description}"
+                )
+
+                # Should charge correct VAT rate
+                self.assertEqual(
+                    vat_charge.rate,
+                    expected_rate,
+                    f"{country_name} B2B should be charged {expected_rate}% VAT - {description}"
+                )
+
+                # Should charge in buyer's country
+                self.assertEqual(
+                    vat_charge.country_code,
+                    country_code,
+                    f"VAT should be charged in {country_name} ({country_code})"
+                )
 
