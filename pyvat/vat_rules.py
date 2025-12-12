@@ -454,11 +454,11 @@ class ChVatRules(NonEuVatRules):
         super(ChVatRules, self).__init__(Decimal('8.1'))
 
 
-class CanadaVatRues(NonEuVatRules):
-    """VAT rules for Canada. (renamed as requested)"""
+class CanadaVatRules(NonEuVatRules):
+    """VAT rules for Canada."""
 
     def __init__(self):
-        super(CanadaVatRues, self).__init__(0)
+        super(CanadaVatRules, self).__init__(0)
 
 
 class NorwayVatRules(NonEuVatRules):
@@ -502,7 +502,7 @@ VAT_RULES = {
     'SI': ConstantEuVatRateRules(22),
     'EG': EgVatRules(),
     'CH': ChVatRules(),
-    'CA': CanadaVatRues(),
+    'CA': CanadaVatRules(),
     'NO': NorwayVatRules(),
     'MC': ConstantEuVatRateRules(20),  # Monaco (French VAT zone)
     'RE': ConstantEuVatRateRules(Decimal('8.5')),  # Réunion (French overseas department)
