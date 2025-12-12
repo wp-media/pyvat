@@ -576,7 +576,7 @@ class GetSaleVatChargeTestCase(TestCase):
             'GP': Decimal('8.5'),
             'MQ': Decimal('8.5'),
         }
-        for seller_cc, buyer_cc, _, description in test_cases[:4]:  # Just test FR to others
+        for seller_cc, buyer_cc, _, description in test_cases[:4]:
             with self.subTest(scenario=f"B2C (2014): {description}"):
                 vat_charge = get_sale_vat_charge(
                     datetime.date(2014, 12, 15),

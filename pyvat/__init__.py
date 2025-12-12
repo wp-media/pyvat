@@ -75,7 +75,7 @@ HMRC_REGISTRY = HMRCRegistry()
 """
 
 EGYPT_REGISTER = EgyptRegistry()
-"""Egypt Registry instance. 
+"""Egypt Registry instance.
 """
 
 SWITZERLAND_REGISTER = SwitzerlandRegistry()

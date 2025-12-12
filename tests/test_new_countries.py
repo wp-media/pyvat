@@ -1,14 +1,14 @@
 """Test suite for new country VAT rules and registries."""
 
 import datetime
-import pyvat
-from pyvat import get_sale_vat_charge, Party, VatChargeAction
-from pyvat.item_type import ItemType
 from decimal import Decimal
+from pyvat import get_sale_vat_charge, Party, VatChargeAction, VAT_REGISTRIES
+from pyvat.item_type import ItemType
+from pyvat.vat_rules import VAT_RULES
 
 try:
     from unittest2 import TestCase
-except (ImportError, AttributeError):
+except (ImportError):
     from unittest import TestCase
 
 
@@ -30,7 +30,7 @@ class NewCountriesVatRulesTestCase(TestCase):
 
         for code, name, expected_rate in test_cases:
             with self.subTest(country=name, code=code):
-                rules = pyvat.vat_rules.VAT_RULES[code]
+                rules = VAT_RULES[code]
                 rate = rules.get_vat_rate(ItemType.generic_electronic_service)
                 self.assertEqual(
                     float(rate),
@@ -54,7 +54,7 @@ class NewCountriesRegistriesTestCase(TestCase):
 
         for code, name, expected_valid, description in test_cases:
             with self.subTest(country=name, code=code):
-                registry = pyvat.VAT_REGISTRIES[code]
+                registry = VAT_REGISTRIES[code]
                 result = registry.check_vat_number('123456789', code, False)
                 self.assertEqual(
                     result.is_valid,
