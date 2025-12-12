@@ -123,13 +123,18 @@ Supported Countries
 
 **EU Countries**: All EU member states with full VIES integration
 
-**Non-EU Countries**:
+**French VAT Zone**: Treated as one VAT zone with EU-like rules
+
+* Monaco (MC) - 20% VAT, uses VIES registry (EU B2B rules apply)
+* Réunion (RE) - 8.5% VAT, uses VIES registry (EU B2B rules apply)
+* Guadeloupe (GP) - 8.5% VAT, uses VIES registry (EU B2B rules apply)
+* Martinique (MQ) - 8.5% VAT, uses VIES registry (EU B2B rules apply)
+
+**Non-EU Countries**: Countries with special VAT arrangements
 
 * Egypt (EG) - 14% VAT, B2B exempt
 * Switzerland (CH) - 8.1% VAT, B2B not exempt
 * Canada (CA) - 0% VAT, B2B exempt
 * Norway (NO) - 25% VAT, B2B not exempt
-* Monaco (MC) - 20% VAT, B2B not exempt
-* French Overseas Departments (RE, GP, MQ) - 8.5% VAT, B2B not exempt
 
 
