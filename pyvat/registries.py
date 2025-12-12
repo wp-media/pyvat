@@ -70,7 +70,6 @@ class NorwayRegistry(Registry):
         return result
 
 
-
 class ViesRegistry(Registry):
     """VIES registry.
 
