@@ -50,6 +50,10 @@ VAT_NUMBER_EXPRESSIONS = {
     "SE": re.compile(r"^\d{12}$"),
     "SI": re.compile(r"^\d{8}$"),
     "SK": re.compile(r"^\d{10}$"),
+    'MC': re.compile(r"^[\da-hj-np-z]{2}\d{9}$", re.IGNORECASE),
+    'RE': re.compile(r"^[\da-hj-np-z]{2}\d{9}$", re.IGNORECASE),
+    'GP': re.compile(r"^[\da-hj-np-z]{2}\d{9}$", re.IGNORECASE),
+    'MQ': re.compile(r"^[\da-hj-np-z]{2}\d{9}$", re.IGNORECASE),
 
 }
 """VAT number expressions.
