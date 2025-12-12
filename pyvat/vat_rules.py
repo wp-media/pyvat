@@ -102,18 +102,20 @@ class EuVatRulesMixin(object):
 
         # If the seller resides in the same country as the buyer, we charge
         # VAT regardless of whether the buyer is a business or not.
-        if seller.country_code == buyer.country_code:
+        # Also applies to French VAT zone for consumers after 2015-01-01
+        if seller.country_code == buyer.country_code or \
+                (seller_in_french_zone and buyer_in_french_zone and
+                 (not buyer.is_business and date >= JANUARY_1_2015)):
             return VatCharge(VatChargeAction.charge,
                              buyer.country_code,
                              self.get_vat_rate(item_type, postal_code))
 
         # French VAT zone: seller in France/territories selling to buyer in France/territories
-        # For B2B or consumers after 2015-01-01, charge buyer's country VAT
-        if seller_in_french_zone and buyer_in_french_zone:
-            if buyer.is_business or date >= JANUARY_1_2015:
-                return VatCharge(VatChargeAction.charge,
-                                 buyer.country_code,
-                                 self.get_vat_rate(item_type, postal_code))
+        # For B2B transactions, charge buyer's country VAT
+        if seller_in_french_zone and buyer_in_french_zone and buyer.is_business:
+            return VatCharge(VatChargeAction.charge,
+                             buyer.country_code,
+                             self.get_vat_rate(item_type, postal_code))
 
         # Consumers in other EU countries after 2015-01-01 are charged in their country
         if not buyer.is_business and date >= JANUARY_1_2015:
