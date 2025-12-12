@@ -100,10 +100,20 @@ class EuVatRulesMixin(object):
         seller_in_french_zone = seller.country_code in FRANCE_COUNTRY_CODES
         buyer_in_french_zone = buyer.country_code in FRANCE_COUNTRY_CODES
 
-        # Charge VAT in buyer's country if:
-        # 1. Same country (always), OR
-        # 2. Consumer after 2015-01-01 (EU-wide rule), OR
-        # 3. French VAT zone B2B or B2C after 2015 (treated as one zone)
+        # Charge VAT in the buyer's country in the following cases:
+        #
+        # 1. Same country transactions (e.g., FR→FR, DE→DE):
+        #    Always charge VAT regardless of buyer type or date
+        #
+        # 2. EU consumer transactions after 2015-01-01:
+        #    Charge VAT at buyer's location (EU-wide rule change)
+        #    Before 2015, consumers were charged at seller's rate (handled later)
+        #
+        # 3. French VAT zone internal transactions (FR, MC, RE, GP, MQ):
+        #    - B2B transactions: Always charge VAT at buyer's rate (no reverse charge)
+        #    - B2C after 2015-01-01: Charge VAT at buyer's rate
+        #    - B2C before 2015: Falls through to use seller's rate (old EU rule)
+        #
         if seller.country_code == buyer.country_code or \
                 (not buyer.is_business and date >= JANUARY_1_2015) or \
                 (seller_in_french_zone and buyer_in_french_zone and
