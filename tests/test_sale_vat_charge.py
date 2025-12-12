@@ -7,7 +7,7 @@ from pyvat import (
     Party,
     VatChargeAction,
 )
-from pyvat.countries import EU_COUNTRY_CODES
+from pyvat.countries import EU_COUNTRY_CODES, FRANCE_COUNTRY_CODES
 try:
     from unittest2 import TestCase
 except ImportError:
@@ -430,7 +430,6 @@ class GetSaleVatChargeTestCase(TestCase):
         # reverse-charge mechanism.
         # Note: French VAT zone (FR, MC, RE, GP, MQ) is tested separately in
         # test_french_vat_zone_transactions() and skipped here.
-        french_vat_zone = {'FR', 'MC', 'RE', 'GP', 'MQ'}
 
         for seller_cc in EU_COUNTRY_CODES:
             for buyer_cc in EU_COUNTRY_CODES:
@@ -438,7 +437,7 @@ class GetSaleVatChargeTestCase(TestCase):
                     continue
 
                 # Skip French VAT zone internal transactions (tested separately)
-                if seller_cc in french_vat_zone and buyer_cc in french_vat_zone:
+                if seller_cc in FRANCE_COUNTRY_CODES and buyer_cc in FRANCE_COUNTRY_CODES:
                     continue
 
                 for it in SUPPORTED_ITEM_TYPES:

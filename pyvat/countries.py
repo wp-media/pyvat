@@ -1,3 +1,16 @@
+FRANCE_COUNTRY_CODES = {
+    'FR',  # France.
+    'MC',  # Monaco (French VAT zone).
+    'RE',  # Réunion (French overseas department).
+    'GP',  # Guadeloupe (French overseas department).
+    'MQ',  # Martinique (French overseas department).
+}
+"""Country codes that are part of the French VAT zone.
+
+France and its territories are treated as one VAT zone for the purposes of VAT
+calculation. This includes mainland France and various overseas departments.
+"""
+
 EU_COUNTRY_CODES = set([
     'AT',  # Austria.
     'BE',  # Belgium.

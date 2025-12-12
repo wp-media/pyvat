@@ -1,6 +1,6 @@
 import datetime
 from decimal import Decimal
-from .countries import EU_COUNTRY_CODES
+from .countries import EU_COUNTRY_CODES, FRANCE_COUNTRY_CODES
 from .item_type import ItemType
 from .vat_charge import VatCharge, VatChargeAction
 from .utils import ensure_decimal
@@ -97,9 +97,8 @@ class EuVatRulesMixin(object):
             )
 
         # French territories (MC, RE, GP, MQ) are treated as part of France for VAT purposes
-        french_territories = {'FR', 'MC', 'RE', 'GP', 'MQ'}
-        seller_in_french_zone = seller.country_code in french_territories
-        buyer_in_french_zone = buyer.country_code in french_territories
+        seller_in_french_zone = seller.country_code in FRANCE_COUNTRY_CODES
+        buyer_in_french_zone = buyer.country_code in FRANCE_COUNTRY_CODES
 
         # If the seller resides in the same country as the buyer, we charge
         # VAT regardless of whether the buyer is a business or not.
