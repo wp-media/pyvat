@@ -247,12 +247,66 @@ class MtVatRules(ConstantEuVatRateRules):
         return super(MtVatRules, self).get_vat_rate(item_type, postal_code)
 
 
-class GbVatRules(ConstantEuVatRateRules):
-    """VAT rules for Great Britain.
+class GreatBritainVatRules(object):
+    """VAT rules for Great Britain (post-Brexit).
+
+    Business requirements:
+    - B2C: Charge 20% UK VAT on invoice
+    - B2B: Use reverse charge mechanism (0% on invoice, buyer accounts VAT)
+    - GB is no longer part of EU (Brexit)
+    - VAT rate is 20% (same rate pre-Brexit and post-Brexit)
+    - Rules are consistent for all dates
     """
 
+    def __init__(self, vat_rate=20):
+        self.vat_rate = ensure_decimal(vat_rate)
+
+    def get_sale_to_country_vat_charge(self,
+                                       date,
+                                       item_type,
+                                       buyer,
+                                       seller,
+                                       postal_code=None):
+        """Get VAT charge when selling TO Great Britain.
+
+        B2C: Charge 20% UK VAT
+        B2B: Reverse charge (0% on invoice)
+        """
+        # We only support business sellers
+        if not seller.is_business:
+            raise NotImplementedError(
+                'non-business sellers are currently not supported'
+            )
+
+        # B2C: Charge 20% UK VAT
+        if not buyer.is_business:
+            return VatCharge(VatChargeAction.charge,
+                             buyer.country_code,
+                             self.get_vat_rate(item_type, postal_code))
+
+        # B2B: Reverse charge
+        return VatCharge(VatChargeAction.reverse_charge,
+                         buyer.country_code,
+                         0)
+
+    def get_sale_from_country_vat_charge(self,
+                                        date,
+                                        item_type,
+                                        buyer,
+                                        seller,
+                                        postal_code=None):
+        """Get VAT charge when selling FROM Great Britain.
+
+        Not implemented - we only handle selling TO GB from other countries.
+        """
+        raise NotImplementedError()
+
     def get_vat_rate(self, item_type, postal_code=None):
-        return super(GbVatRules, self).get_vat_rate(item_type, postal_code)
+        """Get UK VAT rate.
+
+        Returns 20% (UK standard rate - same pre-Brexit and post-Brexit).
+        """
+        return self.vat_rate
 
 
 class SeVatRules(ConstantEuVatRateRules):
@@ -549,7 +603,7 @@ VAT_RULES = {
     'ES': EsVatRules(),
     'FI': FiVatRules(25.5),
     'FR': FranceMonacoVatRules(),
-    'GB': GbVatRules(20),
+    'GB': GreatBritainVatRules(20),
     'HR': HrVatRules(25),
     'HU': ConstantEuVatRateRules(27),
     'IE': IeVatRules(23),

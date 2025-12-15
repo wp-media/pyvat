@@ -32,6 +32,15 @@ contrary to standard international tax law where EU sellers don't charge VAT
 to non-EU buyers.
 """
 
+GREAT_BRITAIN_CODE = 'GB'
+"""Great Britain country code.
+
+Post-Brexit, GB is no longer part of the EU. For digital goods:
+- B2C: Charge 20% UK VAT on invoice
+- B2B: Use reverse charge mechanism (0% on invoice, buyer accounts VAT)
+- VAT rate is 20% (same rate pre-Brexit and post-Brexit)
+"""
+
 EU_COUNTRY_CODES = set([
     'AT',  # Austria.
     'BE',  # Belgium.
@@ -44,7 +53,6 @@ EU_COUNTRY_CODES = set([
     'ES',  # Spain.
     'FI',  # Finland.
     'FR',  # France.
-    'GB',  # Great Britain.
     'EL', 'GR',  # Greece.
     'HR',  # Croatia.
     'HU',  # Hungary.

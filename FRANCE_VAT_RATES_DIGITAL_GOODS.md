@@ -129,21 +129,33 @@
 
 ## 5. France → Great Britain
 
-**Country**: Great Britain (GB)
+**Country**: Great Britain (GB) - **Post-Brexit (No longer in EU)**
 
 | Country | Buyer Type | VAT Action | VAT Rate | Charged In | Notes |
 |---------|------------|------------|----------|------------|-------|
-| **Great Britain** | B2C (Consumer) | Charge | **20%** | GB | Post-Brexit rules |
+| **Great Britain** | B2C (Consumer) | Charge | **20%** | GB | UK VAT rate |
 | **Great Britain** | B2B (Business) | Reverse Charge | **0%** | GB | Business self-accounts |
 
 **Key Points:**
-- Great Britain is **in EU_COUNTRY_CODES** (system still treats as EU)
-- VAT rate: 20%
-- B2C: Charge VAT at GB rate (20%)
-- B2B: Reverse charge mechanism applies
-- Post-Brexit, GB may have different rules in practice, but system treats it as EU
+- Great Britain is **NO LONGER part of the EU** (Brexit)
+- GB has been **removed from EU_COUNTRY_CODES**
+- **VAT rate: 20%** (UK standard rate - **same rate pre-Brexit and post-Brexit**)
+- **B2C**: Charge 20% UK VAT on invoice
+- **B2B**: Reverse charge mechanism applies (0% on invoice, buyer accounts for VAT)
+- Rules are **consistent for all dates** (no 2015 date dependency)
 
-**Note:** After Brexit (2020), Great Britain is no longer in the EU, but the system currently includes it in `EU_COUNTRY_CODES` for VAT calculation purposes.
+**Post-Brexit Implementation:**
+- GB is treated as a non-EU country with special VAT rules
+- Similar to reverse charge mechanism used within EU for B2B
+- Different from standard non-EU treatment (which typically has no VAT charge)
+- **Note**: The 20% VAT rate remains unchanged from pre-Brexit to post-Brexit
+
+**Implementation:**
+- System only checks buyer type to apply correct rate
+- B2C always charges 20% on the invoice (same rate before and after Brexit)
+- B2B always uses 0% reverse charge
+- No date-dependent logic required
+- **VAT rate is 20% for all dates** (pre-Brexit and post-Brexit are the same)
 
 ---
 
@@ -165,7 +177,7 @@
 | **Switzerland** | 8.1% | 8.1% | Special mandate, B2B NOT exempt |
 | **Canada** | 0% | 0% | Standard non-EU |
 | **Norway** | 25% | 25% | Special mandate, B2B NOT exempt |
-| **Great Britain** | 20% | 0% (RC) | Treated as EU in system |
+| **Great Britain** | 20% | 0% (RC) | Post-Brexit, no longer in EU |
 
 **Legend:**
 - **RC** = Reverse Charge (0% on invoice, buyer pays VAT)
@@ -271,7 +283,8 @@ This VAT rate table is based on the pyvat library implementation as of December 
 - `FRANCE_SAME_VAT_TERRITORY`: `{'FR', 'MC'}`
 - `DOM_COUNTRY_CODES`: `{'RE', 'GP', 'MQ'}`
 - `NON_EU_COUNTRY_CODES`: `{'EG', 'CH', 'CA', 'NO'}`
-- `EU_COUNTRY_CODES`: All EU members including MC and GB
+- `GREAT_BRITAIN_CODE`: `'GB'` (post-Brexit, removed from EU)
+- `EU_COUNTRY_CODES`: All EU members including MC (GB removed post-Brexit)
 
 For complete implementation details, see:
 - `pyvat/countries.py` - Country code definitions

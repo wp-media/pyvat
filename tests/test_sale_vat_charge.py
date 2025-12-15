@@ -544,6 +544,16 @@ class GetSaleVatChargeTestCase(TestCase):
                                 if buyer_cc in EXPECTED_VAT_RATES:
                                     self.assertEqual(vat_charge.rate,
                                                      EXPECTED_VAT_RATES[buyer_cc][it])
+                            # Great Britain (post-Brexit): B2C charges 20%, B2B uses reverse charge
+                            elif buyer_cc == 'GB':
+                                if buyer_is_business:
+                                    self.assertEqual(vat_charge.action,
+                                                     VatChargeAction.reverse_charge)
+                                    self.assertEqual(vat_charge.rate, Decimal(0))
+                                else:
+                                    self.assertEqual(vat_charge.action,
+                                                     VatChargeAction.charge)
+                                    self.assertEqual(vat_charge.rate, Decimal(20))
                             else:
                                 # Standard behavior: EU doesn't charge VAT to non-EU
                                 self.assertEqual(vat_charge.action,
@@ -680,6 +690,75 @@ class GetSaleVatChargeTestCase(TestCase):
                             f"MC to FR ({buyer_label}) should charge VAT")
             self.assertEqual(vat_charge.rate, Decimal('20'),
                             f"MC to FR ({buyer_label}) should charge 20%")
+
+    def test_great_britain_vat_rules(self):
+        """Test Great Britain VAT rules (post-Brexit).
+
+        Key rules:
+        1. GB is no longer part of EU (Brexit)
+        2. B2C: Charge 20% UK VAT on invoice
+        3. B2B: Use reverse charge (0% on invoice, buyer accounts VAT)
+        4. Rules are consistent for all dates
+        5. VAT rate is 20% (same rate pre-Brexit and post-Brexit)
+        """
+
+        # Test B2C: France → Great Britain consumer
+        # Should charge 20% UK VAT
+        vat_charge = get_sale_vat_charge(
+            datetime.date(2025, 12, 15),
+            ItemType.generic_electronic_service,
+            Party(country_code='GB', is_business=False),  # Consumer
+            Party(country_code='FR', is_business=True)
+        )
+        self.assertEqual(vat_charge.action, VatChargeAction.charge,
+                        "FR to GB (B2C) should charge VAT")
+        self.assertEqual(vat_charge.rate, Decimal('20'),
+                        "FR to GB (B2C) should charge 20% UK VAT")
+        self.assertEqual(vat_charge.country_code, 'GB')
+
+        # Test B2B: France → Great Britain business
+        # Should use reverse charge
+        vat_charge = get_sale_vat_charge(
+            datetime.date(2025, 12, 15),
+            ItemType.generic_electronic_service,
+            Party(country_code='GB', is_business=True),  # Business
+            Party(country_code='FR', is_business=True)
+        )
+        self.assertEqual(vat_charge.action, VatChargeAction.reverse_charge,
+                        "FR to GB (B2B) should use reverse charge")
+        self.assertEqual(vat_charge.rate, Decimal('0'),
+                        "FR to GB (B2B) should be 0% (reverse charge)")
+        self.assertEqual(vat_charge.country_code, 'GB')
+
+        # Test that rules are consistent across different dates
+        for test_date in [datetime.date(2020, 1, 1),   # Pre-Brexit
+                          datetime.date(2021, 1, 1),   # Post-Brexit
+                          datetime.date(2025, 12, 15)]:  # Current
+
+            # B2C should always charge 20%
+            vat_charge_b2c = get_sale_vat_charge(
+                test_date,
+                ItemType.generic_electronic_service,
+                Party(country_code='GB', is_business=False),
+                Party(country_code='FR', is_business=True)
+            )
+            self.assertEqual(vat_charge_b2c.action, VatChargeAction.charge,
+                            f"B2C should charge VAT on {test_date}")
+            self.assertEqual(vat_charge_b2c.rate, Decimal('20'),
+                            f"B2C should charge 20% on {test_date}")
+
+            # B2B should always use reverse charge
+            vat_charge_b2b = get_sale_vat_charge(
+                test_date,
+                ItemType.generic_electronic_service,
+                Party(country_code='GB', is_business=True),
+                Party(country_code='FR', is_business=True)
+            )
+            self.assertEqual(vat_charge_b2b.action, VatChargeAction.reverse_charge,
+                            f"B2B should use reverse charge on {test_date}")
+            self.assertEqual(vat_charge_b2b.rate, Decimal('0'),
+                            f"B2B should be 0% on {test_date}")
+
 
 
 
