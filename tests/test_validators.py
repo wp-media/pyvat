@@ -7,7 +7,7 @@ from pyvat import (
 )
 try:
     from unittest2 import TestCase
-except (ImportError):
+except ImportError:
     from unittest import TestCase
 
 VAT_NUMBER_FORMAT_CASES = {
