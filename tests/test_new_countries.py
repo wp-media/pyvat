@@ -50,7 +50,9 @@ class NewCountriesRegistriesTestCase(TestCase):
             ('CA', 'Canada', True, 'B2B exempt'),
             ('NO', 'Norway', False, 'B2B not exempt'),
         ]
-        # Note: MC, RE, GP, MQ are now EU countries and use VIES registry
+        # Note: Only MC (Monaco) is treated as an EU country for VAT purposes and uses the VIES registry.
+        # RE (Réunion), GP (Guadeloupe), and MQ (Martinique) are French DOM territories: they use VIES for VAT number validation,
+        # but are outside the EU VAT territory.
 
         for code, name, expected_valid, description in test_cases:
             with self.subTest(country=name, code=code):
