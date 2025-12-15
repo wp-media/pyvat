@@ -445,7 +445,7 @@ class GetSaleVatChargeTestCase(TestCase):
                 if (seller_cc in DOM_COUNTRY_CODES and
                     (buyer_cc in DOM_COUNTRY_CODES or buyer_cc in FRANCE_SAME_VAT_TERRITORY)):
                     continue
-                if (buyer_cc in DOM_COUNTRY_CODES and seller_cc in FRANCE_SAME_VAT_TERRITORY):
+                if buyer_cc in DOM_COUNTRY_CODES and seller_cc in FRANCE_SAME_VAT_TERRITORY:
                     continue
 
                 for it in SUPPORTED_ITEM_TYPES:
