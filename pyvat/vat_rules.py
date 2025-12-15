@@ -455,6 +455,9 @@ class NonEuVatRules(object):
 
     Provides default implementation for countries that charge VAT
     both when selling TO and FROM the country.
+
+    Important: This class charges VAT for BOTH B2C and B2B transactions.
+    There is NO exemption for business-to-business sales.
     """
 
     def __init__(self, vat_rate):
@@ -560,7 +563,11 @@ class FranceDomVatRules(object):
 
 
 class EgVatRules(NonEuVatRules):
-    """VAT rules for Egypt."""
+    """VAT rules for Egypt.
+
+    Egypt requires 14% VAT to be charged on both B2C and B2B sales.
+    B2B transactions are NOT exempt.
+    """
 
     def __init__(self):
         super(EgVatRules, self).__init__(14)

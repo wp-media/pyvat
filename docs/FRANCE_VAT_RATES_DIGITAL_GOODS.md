@@ -104,7 +104,7 @@
 | Country | Buyer Type | VAT Action | VAT Rate | Charged In | Notes |
 |---------|------------|------------|----------|------------|-------|
 | **Egypt** | B2C (Consumer) | Charge | **14%** | EG | Government mandate |
-| **Egypt** | B2B (Business) | No Charge | **0%** | - | B2B exempt |
+| **Egypt** | B2B (Business) | Charge | **14%** | EG | B2B NOT exempt |
 | **Switzerland** | B2C (Consumer) | Charge | **8.1%** | CH | Government mandate |
 | **Switzerland** | B2B (Business) | Charge | **8.1%** | CH | B2B NOT exempt |
 | **Canada** | B2C (Consumer) | No Charge | **0%** | - | No VAT on invoice |
@@ -116,8 +116,8 @@
 - These countries have **special requirements** contrary to standard international tax law
 - Normally, EU sellers don't charge VAT to non-EU buyers
 - These countries have requested VAT be charged
-- **Egypt & Canada**: B2B transactions are exempt
-- **Switzerland & Norway**: B2B transactions are NOT exempt (must charge VAT)
+- **Canada**: B2B transactions are exempt (standard non-EU treatment)
+- **Egypt, Switzerland & Norway**: B2B transactions are NOT exempt (must charge VAT)
 
 **VAT Rates:**
 - Egypt: 14%
@@ -173,7 +173,7 @@
 | **Réunion** | 8.5% | 8.5% | DOM - outside EU, always charge |
 | **Guadeloupe** | 8.5% | 8.5% | DOM - outside EU, always charge |
 | **Martinique** | 8.5% | 8.5% | DOM - outside EU, always charge |
-| **Egypt** | 14% | 0% | Special mandate, B2B exempt |
+| **Egypt** | 14% | 14% | Special mandate, B2B NOT exempt |
 | **Switzerland** | 8.1% | 8.1% | Special mandate, B2B NOT exempt |
 | **Canada** | 0% | 0% | Standard non-EU |
 | **Norway** | 25% | 25% | Special mandate, B2B NOT exempt |
