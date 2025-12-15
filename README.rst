@@ -129,6 +129,6 @@ Supported Countries
 * **France & Monaco** (FR, MC) - Same VAT territory, 20% standard rate
 * **Non-EU Countries** (EG, CH, CA, NO) - Special VAT arrangements
 
-For detailed VAT rates, calculations, and examples for digital goods sold from France, see `FRANCE_VAT_RATES_DIGITAL_GOODS.md <FRANCE_VAT_RATES_DIGITAL_GOODS.md>`_.
+For detailed VAT rates, calculations, and examples for digital goods sold from France, see `FRANCE_VAT_RATES_DIGITAL_GOODS.md <docs/FRANCE_VAT_RATES_DIGITAL_GOODS.md>`_.
 
 
