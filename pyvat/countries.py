@@ -1,14 +1,22 @@
-FRANCE_COUNTRY_CODES = {
-    'FR',  # France.
-    'MC',  # Monaco (French VAT zone).
-    'RE',  # Réunion (French overseas department).
-    'GP',  # Guadeloupe (French overseas department).
-    'MQ',  # Martinique (French overseas department).
+DOM_COUNTRY_CODES = {
+    'RE',  # Réunion.
+    'GP',  # Guadeloupe.
+    'MQ',  # Martinique.
 }
-"""Country codes that are part of the French VAT zone.
 
-France and its territories are treated as one VAT zone for the purposes of VAT
-calculation. This includes mainland France and various overseas departments.
+"""Country codes that are part of the French DOM VAT zone.
+These overseas departments of France are outside EU VAT territory but charge
+VAT on all transactions at customer location rate.
+"""
+
+FRANCE_SAME_VAT_TERRITORY = {
+    'FR',  # France.
+    'MC',  # Monaco.
+}
+
+"""Country codes that are treated as the same VAT territory.
+France and Monaco use identical VAT rates and always charge VAT on invoice
+(no reverse charge for B2B transactions between them).
 """
 
 NON_EU_COUNTRY_CODES = {
@@ -54,9 +62,6 @@ EU_COUNTRY_CODES = set([
     'SI',  # Slovenia.
     'SK',  # Slovakia.
     'MC',  # Monaco (treated as EU with French VAT rules).
-    'RE',  # Réunion (French Overseas Department).
-    'GP',  # Guadeloupe (French Overseas Department).
-    'MQ',  # Martinique (French Overseas Department).
 ])
 """EU country codes.
 

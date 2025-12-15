@@ -1,6 +1,6 @@
 import datetime
 from decimal import Decimal
-from .countries import EU_COUNTRY_CODES, FRANCE_COUNTRY_CODES
+from .countries import EU_COUNTRY_CODES, DOM_COUNTRY_CODES, FRANCE_SAME_VAT_TERRITORY
 from .item_type import ItemType
 from .vat_charge import VatCharge, VatChargeAction
 from .utils import ensure_decimal
@@ -96,28 +96,12 @@ class EuVatRulesMixin(object):
                 'non-business sellers are currently not supported'
             )
 
-        # French territories (MC, RE, GP, MQ) are treated as part of France for VAT purposes
-        seller_in_french_zone = seller.country_code in FRANCE_COUNTRY_CODES
-        buyer_in_french_zone = buyer.country_code in FRANCE_COUNTRY_CODES
-
-        # Charge VAT in the buyer's country in the following cases:
-        #
-        # 1. Same country transactions (e.g., FR→FR, DE→DE):
-        #    Always charge VAT regardless of buyer type or date
-        #
-        # 2. EU consumer transactions after 2015-01-01:
-        #    Charge VAT at buyer's location (EU-wide rule change)
-        #    Before 2015, consumers were charged at seller's rate (handled later)
-        #
-        # 3. French VAT zone internal transactions (FR, MC, RE, GP, MQ):
-        #    - B2B transactions: Always charge VAT at buyer's rate (no reverse charge)
-        #    - B2C after 2015-01-01: Charge VAT at buyer's rate
-        #    - B2C before 2015: Falls through to use seller's rate (old EU rule)
-        #
+        # If the seller resides in the same country as the buyer, we charge
+        # VAT regardless of whether the buyer is a business or not. Similarly,
+        # if the buyer is a consumer, we must charge VAT in the buyer's country
+        # of residence.
         if seller.country_code == buyer.country_code or \
-                (not buyer.is_business and date >= JANUARY_1_2015) or \
-                (seller_in_french_zone and buyer_in_french_zone and
-                 (buyer.is_business or date >= JANUARY_1_2015)):
+                (not buyer.is_business and date >= JANUARY_1_2015):
             return VatCharge(VatChargeAction.charge,
                              buyer.country_code,
                              self.get_vat_rate(item_type, postal_code))
@@ -301,9 +285,37 @@ class PtVatRules(ConstantEuVatRateRules):
         return super(PtVatRules, self).get_vat_rate(item_type, postal_code)
 
 
-class FrVatRules(EuVatRulesMixin):
-    """VAT rules for France.
+class FranceMonacoVatRules(EuVatRulesMixin):
+    """VAT rules for France and Monaco.
+
+    France and Monaco are treated as the same VAT territory:
+    - Both use identical VAT rates (20% standard, with special rates for ebooks, etc.)
+    - FR ↔ MC always charge VAT on invoice (no reverse charge for B2B)
+    - Monaco uses French VAT system
     """
+
+    def get_sale_to_country_vat_charge(self,
+                                       date,
+                                       item_type,
+                                       buyer,
+                                       seller,
+                                       postal_code=None):
+        # DOM sellers (RE, GP, MQ) always charge VAT at buyer's location rate
+        if seller.country_code in DOM_COUNTRY_CODES:
+            return VatCharge(VatChargeAction.charge,
+                             buyer.country_code,
+                             self.get_vat_rate(item_type, postal_code))
+
+        # FR ↔ MC treated as same VAT territory
+        # Both charge 20% VAT on invoice (no reverse charge for B2B)
+        if seller.country_code in FRANCE_SAME_VAT_TERRITORY:
+            return VatCharge(VatChargeAction.charge,
+                             buyer.country_code,
+                             self.get_vat_rate(item_type, postal_code))
+
+        # Otherwise use standard EU rules
+        return super(FranceMonacoVatRules, self).get_sale_to_country_vat_charge(
+            date, item_type, buyer, seller, postal_code)
 
     def get_vat_rate(self, item_type, postal_code=None):
         if item_type.is_broadcasting_service:
@@ -434,6 +446,65 @@ class NonEuVatRules(object):
         return self.vat_rate
 
 
+class FranceDomVatRules(object):
+    """VAT rules for French overseas departments (DOM: RE, GP, MQ).
+
+    Business requirements:
+    - DOM is outside EU VAT territory but VAT is ALWAYS charged on invoice
+    - VAT rate = customer location VAT rate
+    - FR/MC/EU → DOM: Charge 8.5% (DOM rate)
+    - DOM → FR/MC: Charge 20% (France rate)
+    - DOM → EU: Charge destination EU rate
+    - DOM → DOM: Charge 8.5% (DOM rate)
+    - 2015 rule change does NOT affect DOM
+
+    Key principle: Always charge VAT at BUYER's location rate on the invoice.
+    """
+
+    def __init__(self, vat_rate):
+        self.vat_rate = ensure_decimal(vat_rate)
+
+    def get_sale_to_country_vat_charge(self,
+                                       date,
+                                       item_type,
+                                       buyer,
+                                       seller,
+                                       postal_code=None):
+        """Get VAT charge when selling TO this DOM territory.
+
+        Rule: Always charge DOM VAT (8.5%) when customer is in DOM.
+        Applies to: FR → DOM, MC → DOM, EU → DOM, DOM → DOM
+        """
+        # Customer in DOM = charge DOM VAT (8.5%)
+        return VatCharge(VatChargeAction.charge,
+                         buyer.country_code,
+                         self.get_vat_rate(item_type, postal_code))
+
+    def get_sale_from_country_vat_charge(self,
+                                        date,
+                                        item_type,
+                                        buyer,
+                                        seller,
+                                        postal_code=None):
+        """Get VAT charge when selling FROM this DOM territory.
+
+        Rule: Always charge VAT at customer location rate.
+        - DOM → FR/MC: Charge 20% (France rate)
+        - DOM → EU: Charge destination EU rate
+        - DOM → DOM: Charge 8.5% (DOM rate)
+        """
+        # Get buyer's VAT rate from VAT_RULES
+        buyer_rules = VAT_RULES[buyer.country_code]
+
+        return VatCharge(VatChargeAction.charge,
+                         buyer.country_code,
+                         buyer_rules.get_vat_rate(item_type, postal_code))
+
+    def get_vat_rate(self, item_type, postal_code=None):
+        """Get the VAT rate for this territory (8.5%)."""
+        return self.vat_rate
+
+
 class EgVatRules(NonEuVatRules):
     """VAT rules for Egypt."""
 
@@ -477,7 +548,7 @@ VAT_RULES = {
     'GR': ElVatRules(),  # Synonymous country code for Greece
     'ES': EsVatRules(),
     'FI': FiVatRules(25.5),
-    'FR': FrVatRules(),
+    'FR': FranceMonacoVatRules(),
     'GB': GbVatRules(20),
     'HR': HrVatRules(25),
     'HU': ConstantEuVatRateRules(27),
@@ -498,10 +569,10 @@ VAT_RULES = {
     'CH': ChVatRules(),
     'CA': CanadaVatRules(),
     'NO': NorwayVatRules(),
-    'MC': ConstantEuVatRateRules(20),  # Monaco (French VAT zone)
-    'RE': ConstantEuVatRateRules(Decimal('8.5')),  # Réunion (French overseas department)
-    'GP': ConstantEuVatRateRules(Decimal('8.5')),  # Guadeloupe (French overseas department)
-    'MQ': ConstantEuVatRateRules(Decimal('8.5')),  # Martinique (French overseas department)
+    'MC': FranceMonacoVatRules(),  # Monaco uses same VAT rules as France
+    'RE': FranceDomVatRules(Decimal('8.5')),  # Réunion (French overseas department)
+    'GP': FranceDomVatRules(Decimal('8.5')),  # Guadeloupe (French overseas department)
+    'MQ': FranceDomVatRules(Decimal('8.5')),  # Martinique (French overseas department)
 }
 
 """VAT rules by country.

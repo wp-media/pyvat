@@ -123,12 +123,13 @@ Supported Countries
 
 **EU Countries**: All EU member states with full VIES integration
 
-**French VAT Zone**: Treated as one VAT zone with EU-like rules
+**French DOM Territories**: French Overseas Departments
 
-* Monaco (MC) - 20% VAT, uses VIES registry (EU B2B rules apply)
-* Réunion (RE) - 8.5% VAT, uses VIES registry (EU B2B rules apply)
-* Guadeloupe (GP) - 8.5% VAT, uses VIES registry (EU B2B rules apply)
-* Martinique (MQ) - 8.5% VAT, uses VIES registry (EU B2B rules apply)
+* Réunion (RE) - 8.5% VAT, outside EU VAT territory
+* Guadeloupe (GP) - 8.5% VAT, outside EU VAT territory
+* Martinique (MQ) - 8.5% VAT, outside EU VAT territory
+
+**Note**: DOM territories always charge VAT on invoice at customer location rate. Monaco (MC) uses French VAT rules (20%).
 
 **Non-EU Countries**: Countries with special VAT arrangements
 
