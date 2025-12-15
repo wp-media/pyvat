@@ -74,7 +74,7 @@ class NonEuB2BVatChargeTestCase(TestCase):
         """
         test_cases = [
             # (country_code, country_name, expected_vat_rate, description)
-            ('EG', 'Egypt', Decimal('14'), 'B2B exempt - but VAT still charged'),
+            ('EG', 'Egypt', Decimal('14'), 'Registry accepts VAT numbers, but VAT is still charged per NonEuVatRules'),
             ('CH', 'Switzerland', Decimal('8.1'), 'B2B not exempt - VAT charged'),
             ('CA', 'Canada', Decimal('0'), 'B2B exempt - but 0% VAT charged'),
             ('NO', 'Norway', Decimal('25'), 'B2B not exempt - VAT charged'),
