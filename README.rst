@@ -123,19 +123,12 @@ Supported Countries
 
 **EU Countries**: All EU member states with full VIES integration
 
-**French DOM Territories**: French Overseas Departments
+**Special VAT Territories**:
 
-* Réunion (RE) - 8.5% VAT, outside EU VAT territory
-* Guadeloupe (GP) - 8.5% VAT, outside EU VAT territory
-* Martinique (MQ) - 8.5% VAT, outside EU VAT territory
+* **French DOM Territories** (RE, GP, MQ) - 8.5% VAT, outside EU VAT territory
+* **France & Monaco** (FR, MC) - Same VAT territory, 20% standard rate
+* **Non-EU Countries** (EG, CH, CA, NO) - Special VAT arrangements
 
-**Note**: DOM territories always charge VAT on invoice at customer location rate. Monaco (MC) uses French VAT rules (20%).
-
-**Non-EU Countries**: Countries with special VAT arrangements
-
-* Egypt (EG) - 14% VAT, B2B exempt
-* Switzerland (CH) - 8.1% VAT, B2B not exempt
-* Canada (CA) - 0% VAT, B2B exempt
-* Norway (NO) - 25% VAT, B2B not exempt
+For detailed VAT rates, calculations, and examples for digital goods sold from France, see `FRANCE_VAT_RATES_DIGITAL_GOODS.md <FRANCE_VAT_RATES_DIGITAL_GOODS.md>`_.
 
 
