@@ -156,7 +156,7 @@ class FranceSellerDigitalGoodsVatRateTestCase(unittest.TestCase):
         """Test Section 4: France → Non-EU Countries (Special Cases).
 
         Validates:
-        - Egypt: B2C and B2B both 14% (NOT exempt)
+        - Egypt: B2C 14%, B2B 0% (exempt)
         - Switzerland: B2C and B2B both 8.1% (NOT exempt)
         - Canada: B2C and B2B both 0% (exempt)
         - Norway: B2C and B2B both 25% (NOT exempt)
@@ -165,11 +165,11 @@ class FranceSellerDigitalGoodsVatRateTestCase(unittest.TestCase):
         print("TESTING SECTION 4: France → Non-EU Special Cases")
         print("="*80)
 
-        # Egypt - B2B NOT exempt (charges 14%)
+        # Egypt - B2C charges 14%, B2B exempt (0%)
         self._test_scenario('FR', 'EG', False, VatChargeAction.charge,
                            Decimal('14'), "France → Egypt")
-        self._test_scenario('FR', 'EG', True, VatChargeAction.charge,
-                           Decimal('14'), "France → Egypt")
+        self._test_scenario('FR', 'EG', True, VatChargeAction.no_charge,
+                           Decimal('0'), "France → Egypt")
 
         # Switzerland - B2B NOT exempt (charges 8.1%)
         self._test_scenario('FR', 'CH', False, VatChargeAction.charge,
@@ -232,7 +232,7 @@ class FranceSellerDigitalGoodsVatRateTestCase(unittest.TestCase):
             ('FR', 'RE', Decimal('8.5'), Decimal('8.5'), VatChargeAction.charge, "Réunion"),
             ('FR', 'GP', Decimal('8.5'), Decimal('8.5'), VatChargeAction.charge, "Guadeloupe"),
             ('FR', 'MQ', Decimal('8.5'), Decimal('8.5'), VatChargeAction.charge, "Martinique"),
-            ('FR', 'EG', Decimal('14'), Decimal('14'), VatChargeAction.charge, "Egypt"),
+            ('FR', 'EG', Decimal('14'), Decimal('0'), VatChargeAction.no_charge, "Egypt"),
             ('FR', 'CH', Decimal('8.1'), Decimal('8.1'), VatChargeAction.charge, "Switzerland"),
             ('FR', 'CA', Decimal('0'), Decimal('0'), VatChargeAction.charge, "Canada"),
             ('FR', 'NO', Decimal('25'), Decimal('25'), VatChargeAction.charge, "Norway"),

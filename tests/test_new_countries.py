@@ -73,16 +73,18 @@ class NonEuB2BVatChargeTestCase(TestCase):
 
         Unlike EU B2B transactions which use reverse charge, these non-EU countries
         require VAT to be charged per government mandate, regardless of B2B status.
+
+        Exception: Egypt B2B transactions are now exempt (0% VAT).
         """
         test_cases = [
-            # (country_code, country_name, expected_vat_rate, description)
-            ('EG', 'Egypt', Decimal('14'), 'Registry accepts VAT numbers, but VAT is still charged per NonEuVatRules'),
-            ('CH', 'Switzerland', Decimal('8.1'), 'B2B not exempt - VAT charged'),
-            ('CA', 'Canada', Decimal('0'), 'B2B accepts VAT numbers, 0% rate applied'),
-            ('NO', 'Norway', Decimal('25'), 'B2B not exempt - VAT charged'),
+            # (country_code, country_name, expected_vat_rate, expected_action, description)
+            ('EG', 'Egypt', Decimal('0'), VatChargeAction.no_charge, 'B2B exempt - no VAT charged'),
+            ('CH', 'Switzerland', Decimal('8.1'), VatChargeAction.charge, 'B2B not exempt - VAT charged'),
+            ('CA', 'Canada', Decimal('0'), VatChargeAction.charge, 'B2B accepts VAT numbers, 0% rate applied'),
+            ('NO', 'Norway', Decimal('25'), VatChargeAction.charge, 'B2B not exempt - VAT charged'),
         ]
 
-        for country_code, country_name, expected_rate, description in test_cases:
+        for country_code, country_name, expected_rate, expected_action, description in test_cases:
             with self.subTest(country=country_name, code=country_code):
                 # Test B2B transaction from EU seller to non-EU buyer
                 vat_charge = get_sale_vat_charge(
@@ -92,11 +94,11 @@ class NonEuB2BVatChargeTestCase(TestCase):
                     Party(country_code='FR', is_business=True)  # EU seller
                 )
 
-                # Should charge VAT (not reverse charge or no charge)
+                # Check expected action
                 self.assertEqual(
                     vat_charge.action,
-                    VatChargeAction.charge,
-                    f"{country_name} B2B should be charged VAT (not reverse charge) - {description}"
+                    expected_action,
+                    f"{country_name} B2B should have action {expected_action} - {description}"
                 )
 
                 # Should charge correct VAT rate

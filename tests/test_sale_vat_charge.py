@@ -538,12 +538,18 @@ class GetSaleVatChargeTestCase(TestCase):
 
                             # New countries require VAT charge per government mandate
                             if buyer_cc in NON_EU_COUNTRY_CODES:
-                                self.assertEqual(vat_charge.action,
-                                                 VatChargeAction.charge)
-                                # Verify correct VAT rate is charged
-                                if buyer_cc in EXPECTED_VAT_RATES:
-                                    self.assertEqual(vat_charge.rate,
-                                                     EXPECTED_VAT_RATES[buyer_cc][it])
+                                # Egypt: B2B is exempt (0%), B2C charges 14%
+                                if buyer_cc == 'EG' and buyer_is_business:
+                                    self.assertEqual(vat_charge.action,
+                                                     VatChargeAction.no_charge)
+                                    self.assertEqual(vat_charge.rate, Decimal(0))
+                                else:
+                                    self.assertEqual(vat_charge.action,
+                                                     VatChargeAction.charge)
+                                    # Verify correct VAT rate is charged
+                                    if buyer_cc in EXPECTED_VAT_RATES:
+                                        self.assertEqual(vat_charge.rate,
+                                                         EXPECTED_VAT_RATES[buyer_cc][it])
                             # Great Britain (post-Brexit): B2C charges 20%, B2B uses reverse charge
                             elif buyer_cc == 'GB':
                                 if buyer_is_business:
@@ -571,8 +577,8 @@ class GetSaleVatChargeTestCase(TestCase):
         """
 
         # A. FR/MC → DOM: Charge 8.5% (DOM rate)
-        for seller_cc in ['FR', 'MC']:
-            for buyer_cc in ['RE', 'GP', 'MQ']:
+        for seller_cc in FRANCE_SAME_VAT_TERRITORY:
+            for buyer_cc in DOM_COUNTRY_CODES:
                 with self.subTest(scenario=f"{seller_cc} → {buyer_cc}"):
                     vat_charge = get_sale_vat_charge(
                         datetime.date(2015, 1, 1),
@@ -587,8 +593,8 @@ class GetSaleVatChargeTestCase(TestCase):
                     self.assertEqual(vat_charge.country_code, buyer_cc)
 
         # B. DOM → FR/MC: Charge 20% (France rate)
-        for seller_cc in ['RE', 'GP', 'MQ']:
-            for buyer_cc in ['FR', 'MC']:
+        for seller_cc in DOM_COUNTRY_CODES:
+            for buyer_cc in FRANCE_SAME_VAT_TERRITORY:
                 with self.subTest(scenario=f"{seller_cc} → {buyer_cc}"):
                     vat_charge = get_sale_vat_charge(
                         datetime.date(2015, 1, 1),

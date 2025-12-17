@@ -562,15 +562,59 @@ class FranceDomVatRules(object):
         return self.vat_rate
 
 
-class EgVatRules(NonEuVatRules):
+class EgVatRules(object):
     """VAT rules for Egypt.
 
-    Egypt requires 14% VAT to be charged on both B2C and B2B sales.
-    B2B transactions are NOT exempt.
+    Egypt requires 14% VAT to be charged on B2C sales.
+    B2B transactions are exempt (0% VAT).
     """
 
     def __init__(self):
-        super(EgVatRules, self).__init__(14)
+        self.vat_rate = Decimal(14)
+
+    def get_sale_to_country_vat_charge(self,
+                                       date,
+                                       item_type,
+                                       buyer,
+                                       seller,
+                                       postal_code=None):
+        """Get VAT charge when selling TO Egypt.
+
+        B2C: Charge 14% VAT
+        B2B: No charge (0% - exempt)
+        """
+        if buyer.is_business:
+            # B2B: Exempt from VAT
+            return VatCharge(VatChargeAction.no_charge, buyer.country_code, 0)
+        else:
+            # B2C: Charge 14% VAT
+            return VatCharge(VatChargeAction.charge,
+                             buyer.country_code,
+                             self.get_vat_rate(item_type, postal_code))
+
+    def get_sale_from_country_vat_charge(self,
+                                        date,
+                                        item_type,
+                                        buyer,
+                                        seller,
+                                        postal_code=None):
+        """Get VAT charge when selling FROM Egypt.
+
+        B2C: Charge 14% VAT
+        B2B: No charge (0% - exempt)
+        """
+        if buyer.is_business:
+            # B2B: Exempt from VAT
+            return VatCharge(VatChargeAction.no_charge, buyer.country_code, 0)
+        else:
+            # B2C: Charge 14% VAT
+            return VatCharge(VatChargeAction.charge,
+                             buyer.country_code,
+                             self.get_vat_rate(item_type, postal_code))
+
+    def get_vat_rate(self, item_type, postal_code=None):
+        """Get the VAT rate for Egypt (14%)."""
+        return self.vat_rate
 
 
 class ChVatRules(NonEuVatRules):
