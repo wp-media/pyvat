@@ -1,3 +1,46 @@
+DOM_COUNTRY_CODES = {
+    'RE',  # Réunion.
+    'GP',  # Guadeloupe.
+    'MQ',  # Martinique.
+}
+
+"""Country codes that are part of the French DOM VAT zone.
+These overseas departments of France are outside EU VAT territory but charge
+VAT on all transactions at customer location rate.
+"""
+
+FRANCE_SAME_VAT_TERRITORY = {
+    'FR',  # France.
+    'MC',  # Monaco.
+}
+
+"""Country codes that are treated as the same VAT territory.
+France and Monaco use identical VAT rates and always charge VAT on invoice
+(no reverse charge for B2B transactions between them).
+"""
+
+NON_EU_COUNTRY_CODES = {
+    'EG',  # Egypt.
+    'CH',  # Switzerland.
+    'CA',  # Canada.
+    'NO',  # Norway.
+}
+"""Non-EU country codes that require VAT to be charged.
+
+These countries have requested that VAT be charged on sales from EU sellers,
+contrary to standard international tax law where EU sellers don't charge VAT
+to non-EU buyers.
+"""
+
+GREAT_BRITAIN_CODE = 'GB'
+"""Great Britain country code.
+
+Post-Brexit, GB is no longer part of the EU. For digital goods:
+- B2C: Charge 20% UK VAT on invoice
+- B2B: Use reverse charge mechanism (0% on invoice, buyer accounts VAT)
+- VAT rate is 20% (same rate pre-Brexit and post-Brexit)
+"""
+
 EU_COUNTRY_CODES = set([
     'AT',  # Austria.
     'BE',  # Belgium.
@@ -10,7 +53,6 @@ EU_COUNTRY_CODES = set([
     'ES',  # Spain.
     'FI',  # Finland.
     'FR',  # France.
-    'GB',  # Great Britain.
     'EL', 'GR',  # Greece.
     'HR',  # Croatia.
     'HU',  # Hungary.
@@ -27,7 +69,7 @@ EU_COUNTRY_CODES = set([
     'SE',  # Sweden.
     'SI',  # Slovenia.
     'SK',  # Slovakia.
-    'EG',  # Egypt.
+    'MC',  # Monaco (treated as EU with French VAT rules).
 ])
 """EU country codes.
 

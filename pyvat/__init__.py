@@ -4,7 +4,7 @@ import pycountry
 
 from .item_type import ItemType
 from .party import Party
-from .registries import ViesRegistry, HMRCRegistry, EgyptRegistry
+from .registries import ViesRegistry, HMRCRegistry, EgyptRegistry, SwitzerlandRegistry, CanadaRegistry, NorwayRegistry
 
 from .result import VatNumberCheckResult
 from .vat_charge import VatCharge, VatChargeAction
@@ -50,7 +50,10 @@ VAT_NUMBER_EXPRESSIONS = {
     "SE": re.compile(r"^\d{12}$"),
     "SI": re.compile(r"^\d{8}$"),
     "SK": re.compile(r"^\d{10}$"),
-    'EG': re.compile(r'^\d{9}$'),
+    'MC': re.compile(r"^[\da-hj-np-z]{2}\d{9}$", re.IGNORECASE),
+    'RE': re.compile(r"^[\da-hj-np-z]{2}\d{9}$", re.IGNORECASE),
+    'GP': re.compile(r"^[\da-hj-np-z]{2}\d{9}$", re.IGNORECASE),
+    'MQ': re.compile(r"^[\da-hj-np-z]{2}\d{9}$", re.IGNORECASE),
 
 }
 """VAT number expressions.
@@ -72,7 +75,19 @@ HMRC_REGISTRY = HMRCRegistry()
 """
 
 EGYPT_REGISTER = EgyptRegistry()
-"""Egypt Registry instance. 
+"""Egypt Registry instance.
+"""
+
+SWITZERLAND_REGISTER = SwitzerlandRegistry()
+"""Switzerland Registry instance.
+"""
+
+CANADA_REGISTER = CanadaRegistry()
+"""Canada Registry instance.
+"""
+
+NORWAY_REGISTER = NorwayRegistry()
+"""Norway Registry instance.
 """
 
 VAT_REGISTRIES = {
@@ -104,7 +119,14 @@ VAT_REGISTRIES = {
     "SE": VIES_REGISTRY,
     "SK": VIES_REGISTRY,
     "SI": VIES_REGISTRY,
+    "MC": VIES_REGISTRY,  # Monaco (French VAT zone)
+    "RE": VIES_REGISTRY,  # Réunion (French overseas department)
+    "GP": VIES_REGISTRY,  # Guadeloupe (French overseas department)
+    "MQ": VIES_REGISTRY,  # Martinique (French overseas department)
     "EG": EGYPT_REGISTER,
+    "CH": SWITZERLAND_REGISTER,
+    "CA": CANADA_REGISTER,
+    "NO": NORWAY_REGISTER,
 }
 """VAT registries.
 
@@ -213,12 +235,14 @@ def check_vat_number(vat_number, country_code=None, test=False):
             ],
         )
 
-    # Test the VAT number format.
-    format_result = is_vat_number_format_valid(vat_number, country_code)
-    if format_result is not True:
-        return VatNumberCheckResult(
-            format_result, ["> VAT number validation failed: %r" % (format_result)]
-        )
+    # Test the VAT number format (only if format pattern exists).
+    # Skip format validation for countries without VAT_NUMBER_EXPRESSIONS.
+    if country_code in VAT_NUMBER_EXPRESSIONS:
+        format_result = is_vat_number_format_valid(vat_number, country_code)
+        if format_result is not True:
+            return VatNumberCheckResult(
+                format_result, ["> VAT number validation failed: %r" % (format_result)]
+            )
 
     # Attempt to check the VAT number against a registry.
     if country_code not in VAT_REGISTRIES:
