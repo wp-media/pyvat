@@ -672,6 +672,9 @@ class CanadaVatRules(NonEuVatRules):
         'Y': Decimal('5'),       # Yukon
     }
 
+    def __init__(self):
+        super(CanadaVatRules, self).__init__(0)
+
     def get_sale_to_country_vat_charge(self,
                                        date,
                                        item_type,
