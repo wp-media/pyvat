@@ -624,13 +624,6 @@ class ChVatRules(NonEuVatRules):
         super(ChVatRules, self).__init__(Decimal('8.1'))
 
 
-class CanadaVatRules(NonEuVatRules):
-    """VAT rules for Canada."""
-
-    def __init__(self):
-        super(CanadaVatRules, self).__init__(0)
-
-
 class NorwayVatRules(NonEuVatRules):
     """VAT rules for Norway."""
 
@@ -638,6 +631,83 @@ class NorwayVatRules(NonEuVatRules):
         super(NorwayVatRules, self).__init__(25)
 
 
+class CanadaVatRules(NonEuVatRules):
+    """VAT rules for Canada.
+
+    Canada has province-specific VAT rates (GST/HST) determined by the first
+    letter of the postal code:
+    - A: Newfoundland and Labrador (HST 15%)
+    - B: Nova Scotia (HST 15%)
+    - C: Prince Edward Island (HST 15%)
+    - E: New Brunswick (HST 15%)
+    - G, H, J: Quebec (GST 5% + QST 9.975% = 14.975%)
+    - K, L, M, N, P: Ontario (HST 13%)
+    - R: Manitoba (GST 5% + PST 7% = 12%)
+    - S: Saskatchewan (GST 5% + PST 6% = 11%)
+    - T: Alberta (GST 5%)
+    - V: British Columbia (GST 5% + PST 7% = 12%)
+    - X: Northwest Territories and Nunavut (GST 5%)
+    - Y: Yukon (GST 5%)
+    """
+
+    # Map of postal code prefix to VAT rate
+    PROVINCE_VAT_RATES = {
+        'A': Decimal('15'),      # Newfoundland and Labrador
+        'B': Decimal('15'),      # Nova Scotia
+        'C': Decimal('15'),      # Prince Edward Island
+        'E': Decimal('15'),      # New Brunswick
+        'G': Decimal('14.975'),  # Quebec
+        'H': Decimal('14.975'),  # Quebec
+        'J': Decimal('14.975'),  # Quebec
+        'K': Decimal('13'),      # Ontario
+        'L': Decimal('13'),      # Ontario
+        'M': Decimal('13'),      # Ontario
+        'N': Decimal('13'),      # Ontario
+        'P': Decimal('13'),      # Ontario
+        'R': Decimal('12'),      # Manitoba
+        'S': Decimal('11'),      # Saskatchewan
+        'T': Decimal('5'),       # Alberta
+        'V': Decimal('12'),      # British Columbia
+        'X': Decimal('5'),       # Northwest Territories and Nunavut
+        'Y': Decimal('5'),       # Yukon
+    }
+
+    def __init__(self):
+        super(CanadaVatRules, self).__init__(0)
+
+    def get_sale_to_country_vat_charge(self,
+                                       date,
+                                       item_type,
+                                       buyer,
+                                       seller,
+                                       postal_code=None):
+        return VatCharge(VatChargeAction.charge,
+                         buyer.country_code,
+                         self.get_vat_rate(item_type, postal_code))
+
+    def get_vat_rate(self, item_type, postal_code=None):
+        """Get the VAT rate for Canada based on postal code.
+
+        :param item_type: Item type (not used for Canada, same rate for all items)
+        :type item_type: ItemType
+        :param postal_code: Canadian postal code to determine province
+        :type postal_code: str
+        :returns: the VAT rate in percent
+        :rtype: decimal.Decimal
+        """
+        if not postal_code:
+            # Default to GST (5%) if no postal code provided
+            return Decimal('5')
+
+        # Get the first character of the postal code (uppercase)
+        postal_code_str = str(postal_code).strip().upper()
+        if not postal_code_str:
+            return Decimal('5')
+
+        prefix = postal_code_str[0]
+
+        # Return the province-specific rate, or default to GST
+        return self.PROVINCE_VAT_RATES.get(prefix, Decimal('5'))
 
 # VAT rates updated July 1st 2025
 VAT_RULES = {
