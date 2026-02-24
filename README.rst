@@ -67,3 +67,68 @@ Usage
 
 
 For more detailed documentation, see the `full pyvat documentation <http://pyvat.readthedocs.org/>`_.
+
+
+Running Tests
+-------------
+
+``pyvat`` uses `pytest <https://pytest.org/>`_ for testing. To run the test suite:
+
+**Install test dependencies:**
+
+.. code-block:: bash
+
+    $ pip install pytest
+
+**Run all tests:**
+
+.. code-block:: bash
+
+    $ python -m pytest tests/ -v
+
+**Run specific test files:**
+
+.. code-block:: bash
+
+    # Test new countries implementation
+    $ python -m pytest tests/test_new_countries.py -v
+
+    # Test VAT charge calculations
+    $ python -m pytest tests/test_sale_vat_charge.py -v
+
+    # Test VAT number validators
+    $ python -m pytest tests/test_validators.py -v
+
+**Run with coverage:**
+
+.. code-block:: bash
+
+    $ pip install pytest-cov
+    $ python -m pytest tests/ --cov=pyvat --cov-report=html
+
+**Test Results:**
+
+The test suite includes:
+
+* **VAT Rules Tests**: Verify correct VAT rates for all supported countries
+* **Registry Tests**: Test B2B exemption logic for different countries
+* **VAT Charge Tests**: Ensure proper VAT calculation for cross-border sales
+* **Validator Tests**: Check VAT number format validation
+
+*Note: Some validator tests that call external VIES API are currently skipped and will be refactored with mocks.*
+
+
+Supported Countries
+-------------------
+
+**EU Countries**: All EU member states with full VIES integration
+
+**Special VAT Territories**:
+
+* **French DOM Territories** (RE, GP, MQ) - 8.5% VAT, outside EU VAT territory
+* **France & Monaco** (FR, MC) - Same VAT territory, 20% standard rate
+* **Non-EU Countries** (EG, CH, CA, NO) - Special VAT arrangements
+
+For detailed VAT rates, calculations, and examples for digital goods sold from France, see `FRANCE_VAT_RATES_DIGITAL_GOODS.md <docs/FRANCE_VAT_RATES_DIGITAL_GOODS.md>`_.
+
+

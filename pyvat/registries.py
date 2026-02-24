@@ -28,13 +28,47 @@ class Registry(object):
 
 class EgyptRegistry(Registry):
     """
-    Egyptian registry refusing all VAT numbers.
+    Egyptian registry accepting all VAT numbers for B2B exemption.
+    """
+
+    def check_vat_number(self, vat_number, country_code, test):
+        result = VatNumberCheckResult()
+        result.is_valid = True
+        return result
+
+
+class SwitzerlandRegistry(Registry):
+    """
+    Switzerland registry refusing all VAT numbers (B2B will not be exempt).
     """
 
     def check_vat_number(self, vat_number, country_code, test):
         result = VatNumberCheckResult()
         result.is_valid = False
         return result
+
+
+class CanadaRegistry(Registry):
+    """
+    Canadian registry accepting all VAT numbers for B2B exemption.
+    """
+
+    def check_vat_number(self, vat_number, country_code, test):
+        result = VatNumberCheckResult()
+        result.is_valid = True
+        return result
+
+
+class NorwayRegistry(Registry):
+    """
+    Norwegian registry refusing all VAT numbers (B2B will not be exempt).
+    """
+
+    def check_vat_number(self, vat_number, country_code, test):
+        result = VatNumberCheckResult()
+        result.is_valid = False
+        return result
+
 
 class ViesRegistry(Registry):
     """VIES registry.
@@ -328,4 +362,4 @@ class HMRCRegistry(Registry):
         }
 
 
-__all__ = ('Registry', 'ViesRegistry', 'HMRCRegistry', 'EgyptRegistry', )
+__all__ = ('Registry', 'ViesRegistry', 'HMRCRegistry', 'EgyptRegistry', 'SwitzerlandRegistry', 'CanadaRegistry', 'NorwayRegistry')
