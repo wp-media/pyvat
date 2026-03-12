@@ -624,6 +624,20 @@ class ChVatRules(NonEuVatRules):
         super(ChVatRules, self).__init__(Decimal('8.1'))
 
 
+class InVatRules(NonEuVatRules):
+    """VAT rules for India."""
+
+    def __init__(self):
+        super(InVatRules, self).__init__(Decimal('18'))
+
+
+class AuVatRules(NonEuVatRules):
+    """VAT rules for Australia."""
+
+    def __init__(self):
+        super(AuVatRules, self).__init__(Decimal('10'))
+
+
 class NorwayVatRules(NonEuVatRules):
     """VAT rules for Norway."""
 
@@ -744,6 +758,8 @@ VAT_RULES = {
     'CH': ChVatRules(),
     'CA': CanadaVatRules(),
     'NO': NorwayVatRules(),
+    'IN': InVatRules(),
+    'AU': AuVatRules(),
     'MC': FranceMonacoVatRules(),  # Monaco uses same VAT rules as France
     'RE': FranceDomVatRules(Decimal('8.5')),  # Réunion (French overseas department)
     'GP': FranceDomVatRules(Decimal('8.5')),  # Guadeloupe (French overseas department)

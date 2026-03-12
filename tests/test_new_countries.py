@@ -26,6 +26,8 @@ class NewCountriesVatRulesTestCase(TestCase):
             ('RE', 'Réunion (DOM)', 8.5),
             ('GP', 'Guadeloupe (DOM)', 8.5),
             ('MQ', 'Martinique (DOM)', 8.5),
+            ('IN', 'India', 18),
+            ('AU', 'Australia', 10),
         ]
 
         for code, name, expected_rate in test_cases:
@@ -49,6 +51,8 @@ class NewCountriesRegistriesTestCase(TestCase):
             ('CH', 'Switzerland', False, 'B2B not exempt'),
             ('CA', 'Canada', True, 'B2B exempt'),
             ('NO', 'Norway', False, 'B2B not exempt'),
+            ('IN', 'India', False, 'B2B not exempt'),
+            ('AU', 'Australia', False, 'B2B not exempt'),
         ]
         # Note: Only MC (Monaco) is treated as an EU country for VAT purposes and uses the VIES registry.
         # RE (Réunion), GP (Guadeloupe), and MQ (Martinique) are French DOM territories: they use VIES for VAT number validation,
@@ -82,6 +86,8 @@ class NonEuB2BVatChargeTestCase(TestCase):
             ('CH', 'Switzerland', Decimal('8.1'), VatChargeAction.charge, 'B2B not exempt - VAT charged'),
             ('CA', 'Canada', Decimal('0'), VatChargeAction.charge, 'B2B accepts VAT numbers, 0% rate applied'),
             ('NO', 'Norway', Decimal('25'), VatChargeAction.charge, 'B2B not exempt - VAT charged'),
+            ('IN', 'India', Decimal('18'), VatChargeAction.charge, 'B2B not exempt - VAT charged'),
+            ('AU', 'Australia', Decimal('10'), VatChargeAction.charge, 'B2B not exempt - VAT charged'),
         ]
 
         for country_code, country_name, expected_rate, expected_action, description in test_cases:

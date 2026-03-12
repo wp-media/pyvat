@@ -24,6 +24,8 @@ NON_EU_COUNTRY_CODES = {
     'CH',  # Switzerland.
     'CA',  # Canada.
     'NO',  # Norway.
+    'IN',  # India.
+    'AU',  # Australia.
 }
 """Non-EU country codes that require VAT to be charged.
 

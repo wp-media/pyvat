@@ -4,7 +4,7 @@ import pycountry
 
 from .item_type import ItemType
 from .party import Party
-from .registries import ViesRegistry, HMRCRegistry, EgyptRegistry, SwitzerlandRegistry, CanadaRegistry, NorwayRegistry
+from .registries import ViesRegistry, HMRCRegistry, EgyptRegistry, SwitzerlandRegistry, CanadaRegistry, NorwayRegistry, IndiaRegistry, AustraliaRegistry
 
 from .result import VatNumberCheckResult
 from .vat_charge import VatCharge, VatChargeAction
@@ -90,6 +90,14 @@ NORWAY_REGISTER = NorwayRegistry()
 """Norway Registry instance.
 """
 
+INDIA_REGISTER = IndiaRegistry()
+"""India Registry instance.
+"""
+
+AUSTRALIA_REGISTER = AustraliaRegistry()
+"""Australia Registry instance.
+"""
+
 VAT_REGISTRIES = {
     "AT": VIES_REGISTRY,
     "BE": VIES_REGISTRY,
@@ -127,6 +135,8 @@ VAT_REGISTRIES = {
     "CH": SWITZERLAND_REGISTER,
     "CA": CANADA_REGISTER,
     "NO": NORWAY_REGISTER,
+    "IN": INDIA_REGISTER,
+    "AU": AUSTRALIA_REGISTER,
 }
 """VAT registries.
 
