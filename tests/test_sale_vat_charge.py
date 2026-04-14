@@ -11,7 +11,7 @@ from pyvat.countries import (EU_COUNTRY_CODES, NON_EU_COUNTRY_CODES,
                              DOM_COUNTRY_CODES, FRANCE_SAME_VAT_TERRITORY)
 try:
     from unittest2 import TestCase
-except ImportError:
+except (ImportError, AttributeError):
     from unittest import TestCase
 
 EXPECTED_VAT_RATES = {
@@ -296,13 +296,14 @@ EXPECTED_VAT_RATES = {
         ItemType.enewspaper: Decimal('8.1'),
     },
     'CA': {
-        ItemType.generic_physical_good: Decimal(0),
-        ItemType.generic_electronic_service: Decimal(0),
-        ItemType.generic_telecommunications_service: Decimal(0),
-        ItemType.generic_broadcasting_service: Decimal(0),
-        ItemType.prepaid_broadcasting_service: Decimal(0),
-        ItemType.ebook: Decimal(0),
-        ItemType.enewspaper: Decimal(0),
+        # No postal code → Ontario fallback (13%); no B2B exemption
+        ItemType.generic_physical_good: Decimal(13),
+        ItemType.generic_electronic_service: Decimal(13),
+        ItemType.generic_telecommunications_service: Decimal(13),
+        ItemType.generic_broadcasting_service: Decimal(13),
+        ItemType.prepaid_broadcasting_service: Decimal(13),
+        ItemType.ebook: Decimal(13),
+        ItemType.enewspaper: Decimal(13),
     },
     'NO': {
         ItemType.generic_physical_good: Decimal(25),

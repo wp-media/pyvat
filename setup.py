@@ -1,15 +1,10 @@
 #!/usr/bin/env python
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from setuptools import setup, find_packages
 
 with open("README.rst", "r") as fh:
     long_description = fh.read()
 
-packages = [
-    'pyvat',
-]
+packages = find_packages()
 
 requires = [
     'requests>=1.0.0,<3.0',
