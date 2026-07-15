@@ -108,7 +108,7 @@ class ViesRegistry(Registry):
     must comfortably exceed that.
     """
 
-    TIMEOUT_ENV_VAR = 'PYVAT_VIES_TIMEOUT'
+    TIMEOUT_ENV_VAR = 'PYVAT_VIES_VALIDATION_TIMEOUT_S'
 
     def check_vat_number(self, vat_number, country_code, test):
         # Non-ISO code used for Greece.
@@ -278,7 +278,7 @@ class HMRCRegistry(Registry):
     DEFAULT_TIMEOUT = 12
     """Default timeout for the requests."""
 
-    TIMEOUT_ENV_VAR = 'PYVAT_HMRC_TIMEOUT'
+    TIMEOUT_ENV_VAR = 'PYVAT_HMRC_VALIDATION_TIMEOUT_S'
 
     access_token = None
     """Access token for the API."""

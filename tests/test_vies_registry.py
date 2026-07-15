@@ -54,13 +54,13 @@ class ViesRegistryTimeoutTestCase(TestCase):
         registry = ViesRegistry(timeout=45)
         self.assertEqual(registry.timeout, 45)
 
-    @patch.dict('os.environ', {'PYVAT_VIES_TIMEOUT': '60'})
+    @patch.dict('os.environ', {'PYVAT_VIES_VALIDATION_TIMEOUT_S': '60'})
     def test_env_var_timeout_override(self):
-        """The timeout is configurable via PYVAT_VIES_TIMEOUT."""
+        """The timeout is configurable via PYVAT_VIES_VALIDATION_TIMEOUT_S."""
         registry = ViesRegistry()
         self.assertEqual(registry.timeout, 60.0)
 
-    @patch.dict('os.environ', {'PYVAT_VIES_TIMEOUT': '60'})
+    @patch.dict('os.environ', {'PYVAT_VIES_VALIDATION_TIMEOUT_S': '60'})
     def test_constructor_takes_precedence_over_env_var(self):
         """An explicit constructor timeout wins over the environment."""
         registry = ViesRegistry(timeout=45)

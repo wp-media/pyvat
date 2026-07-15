@@ -114,9 +114,9 @@ class HMRCRegistryTestCase(TestCase):
         registry = HMRCRegistry(timeout=30)
         self.assertEqual(registry.timeout, 30)
 
-    @patch.dict('os.environ', {'PYVAT_HMRC_TIMEOUT': '25'})
+    @patch.dict('os.environ', {'PYVAT_HMRC_VALIDATION_TIMEOUT_S': '25'})
     def test_env_var_timeout_override(self):
-        """The timeout is configurable via PYVAT_HMRC_TIMEOUT."""
+        """The timeout is configurable via PYVAT_HMRC_VALIDATION_TIMEOUT_S."""
         registry = HMRCRegistry()
         self.assertEqual(registry.timeout, 25.0)
 
