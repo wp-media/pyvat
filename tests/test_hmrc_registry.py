@@ -105,6 +105,34 @@ class HMRCRegistryTestCase(TestCase):
         log_text = '\n'.join(result.log_lines)
         self.assertIn('nondeterministic', log_text)
 
+    def test_default_timeout(self):
+        """The default timeout matches the documented class default."""
+        self.assertEqual(self.registry.timeout, 12)
+
+    def test_constructor_timeout_override(self):
+        """The timeout is configurable via the constructor."""
+        registry = HMRCRegistry(timeout=30)
+        self.assertEqual(registry.timeout, 30)
+
+    @patch.dict('os.environ', {'PYVAT_HMRC_TIMEOUT': '25'})
+    def test_env_var_timeout_override(self):
+        """The timeout is configurable via PYVAT_HMRC_TIMEOUT."""
+        registry = HMRCRegistry()
+        self.assertEqual(registry.timeout, 25.0)
+
+    @patch('pyvat.registries.requests.get')
+    def test_timeout_is_passed_to_request(self, mock_get):
+        """The configured timeout is used for the lookup request."""
+        mock_get.return_value = _make_response(
+            404, text='{"code": "NOT_FOUND"}'
+        )
+
+        registry = HMRCRegistry(timeout=30)
+        registry.access_token = 'test-token'
+        registry.check_vat_number('123456789', 'GB', False)
+
+        self.assertEqual(mock_get.call_args.kwargs['timeout'], 30)
+
     @patch('pyvat.registries.requests.get')
     def test_timeout_is_reported_as_outage(self, mock_get):
         """A request timeout must still be flagged so outage detection works."""
