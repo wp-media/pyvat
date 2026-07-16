@@ -94,7 +94,7 @@ following order of precedence:
    * ``PYVAT_VIES_VALIDATION_TIMEOUT_S`` — VIES registry (EU countries).
    * ``PYVAT_HMRC_VALIDATION_TIMEOUT_S`` — HMRC registry (GB).
 
-3. **Default**: 30 seconds for VIES, 12 seconds for HMRC.
+3. **Default**: 15 seconds for VIES, 12 seconds for HMRC.
 
 On timeout, registry checks do not raise — the result carries
 ``is_valid=None`` with a ``timed out`` entry in its ``log_lines``.
