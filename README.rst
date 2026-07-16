@@ -69,6 +69,43 @@ Usage
 For more detailed documentation, see the `full pyvat documentation <http://pyvat.readthedocs.org/>`_.
 
 
+Configuration
+-------------
+
+**Registry request timeouts**
+
+Registry lookups are performed against external services (the EU VIES SOAP
+endpoint and the UK HMRC API), whose response times vary — some VIES member
+state backends (e.g. Denmark) can take well over 10 seconds to answer. The
+request timeout for each registry is therefore configurable, resolved in the
+following order of precedence:
+
+1. **Constructor argument** (seconds):
+
+   .. code-block:: python
+
+       from pyvat.registries import ViesRegistry, HMRCRegistry
+
+       vies = ViesRegistry(timeout=45)
+       hmrc = HMRCRegistry(timeout=20)
+
+2. **Environment variable** (seconds):
+
+   * ``PYVAT_VIES_VALIDATION_TIMEOUT_S`` — VIES registry (EU countries).
+   * ``PYVAT_HMRC_VALIDATION_TIMEOUT_S`` — HMRC registry (GB).
+
+3. **Default**: 15 seconds for VIES, 12 seconds for HMRC.
+
+On timeout, registry checks do not raise — the result carries
+``is_valid=None`` with a ``timed out`` entry in its ``log_lines``.
+
+**HMRC API credentials**
+
+Validating GB VAT numbers against the HMRC API requires OAuth client
+credentials, supplied via the ``PYVAT_UK_CLIENT_ID`` and
+``PYVAT_UK_CLIENT_SECRET`` environment variables.
+
+
 Running Tests
 -------------
 

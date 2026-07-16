@@ -15,6 +15,24 @@ class Registry(object):
     Defines an explicit interface for accessing arbitary registries.
     """
 
+    DEFAULT_TIMEOUT = 8
+    """Default timeout in seconds for requests to the registry."""
+
+    TIMEOUT_ENV_VAR = None
+    """Name of the environment variable that overrides the default timeout."""
+
+    def __init__(self, timeout=None):
+        """
+        :param timeout: Timeout in seconds for requests to the registry.
+            Defaults to the value of the environment variable named by
+            :attr:`TIMEOUT_ENV_VAR` if set, otherwise :attr:`DEFAULT_TIMEOUT`.
+        """
+        if timeout is None and self.TIMEOUT_ENV_VAR:
+            env_timeout = os.environ.get(self.TIMEOUT_ENV_VAR)
+            if env_timeout:
+                timeout = float(env_timeout)
+        self.timeout = timeout if timeout is not None else self.DEFAULT_TIMEOUT
+
     def check_vat_number(self, vat_number, country_code, test):
         """Check if a VAT number is valid according to the registry.
 
@@ -76,13 +94,21 @@ class ViesRegistry(Registry):
     Uses the European Commision's VIES registry for validating VAT numbers.
     """
 
-    CHECK_VAT_SERVICE_URL = 'http://ec.europa.eu/taxation_customs/vies/' \
+    CHECK_VAT_SERVICE_URL = 'https://ec.europa.eu/taxation_customs/vies/' \
                             'services/checkVatService'
     """URL for the VAT checking service.
     """
 
-    DEFAULT_TIMEOUT = 8
-    """Timeout for the requests."""
+    DEFAULT_TIMEOUT = 15
+    """Default timeout for the requests.
+
+    Each VIES member state runs its own backend behind the shared SOAP
+    endpoint and response times vary widely per country -- Denmark has
+    been observed taking ~14 seconds for valid numbers, so the timeout
+    must comfortably exceed that.
+    """
+
+    TIMEOUT_ENV_VAR = 'PYVAT_VIES_VALIDATION_TIMEOUT_S'
 
     def check_vat_number(self, vat_number, country_code, test):
         # Non-ISO code used for Greece.
@@ -116,7 +142,7 @@ class ViesRegistry(Registry):
                 headers={
                     'Content-Type': 'text/xml; charset=utf-8',
                 },
-                timeout=self.DEFAULT_TIMEOUT
+                timeout=self.timeout
             )
         except Timeout as e:
             result.log_lines.append(u'< Request to EU VIEW registry timed out:'
@@ -250,7 +276,9 @@ class HMRCRegistry(Registry):
     """
 
     DEFAULT_TIMEOUT = 12
-    """Timeout for the requests."""
+    """Default timeout for the requests."""
+
+    TIMEOUT_ENV_VAR = 'PYVAT_HMRC_VALIDATION_TIMEOUT_S'
 
     access_token = None
     """Access token for the API."""
@@ -270,14 +298,14 @@ class HMRCRegistry(Registry):
             headers = self._authentication_headers()
             response = requests.get(
                 url + vat_number,
-                timeout=self.DEFAULT_TIMEOUT,
+                timeout=self.timeout,
                 headers=headers
             )
             if response.status_code == 401:
                 self._authenticate(test)
                 headers = self._authentication_headers()
                 response = requests.get(url + vat_number,
-                                 timeout=self.DEFAULT_TIMEOUT, headers=headers)
+                                 timeout=self.timeout, headers=headers)
         except Timeout as e:
             result.log_lines.append(u'< Request to HMRC registry timed out:'
                                     u' {}'.format(e))
@@ -352,7 +380,7 @@ class HMRCRegistry(Registry):
             "client_id": os.environ.get('PYVAT_UK_CLIENT_ID'),
             "client_secret": os.environ.get('PYVAT_UK_CLIENT_SECRET'),
         }
-        r = requests.post(url, data=data)
+        r = requests.post(url, data=data, timeout=self.timeout)
         if r.ok:
             response = r.json()
             self.access_token = response["access_token"]
