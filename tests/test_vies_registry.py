@@ -47,7 +47,7 @@ class ViesRegistryTimeoutTestCase(TestCase):
     def test_default_timeout(self):
         """The default timeout allows for slow member state backends."""
         registry = ViesRegistry()
-        self.assertEqual(registry.timeout, 30)
+        self.assertEqual(registry.timeout, 15)
 
     def test_constructor_timeout_override(self):
         """The timeout is configurable via the constructor."""

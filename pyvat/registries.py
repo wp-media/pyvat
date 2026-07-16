@@ -99,7 +99,7 @@ class ViesRegistry(Registry):
     """URL for the VAT checking service.
     """
 
-    DEFAULT_TIMEOUT = 30
+    DEFAULT_TIMEOUT = 15
     """Default timeout for the requests.
 
     Each VIES member state runs its own backend behind the shared SOAP
