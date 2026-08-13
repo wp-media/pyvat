@@ -158,7 +158,7 @@ class FranceSellerDigitalGoodsVatRateTestCase(unittest.TestCase):
         Validates:
         - Egypt: B2C 14%, B2B 0% (exempt)
         - Switzerland: B2C and B2B both 8.1% (NOT exempt)
-        - Canada: B2C and B2B both 0% (exempt)
+        - Canada: B2C and B2B both 13% (Ontario fallback, no B2B exemption)
         - Norway: B2C and B2B both 25% (NOT exempt)
         """
         print("\n" + "="*80)
@@ -177,11 +177,11 @@ class FranceSellerDigitalGoodsVatRateTestCase(unittest.TestCase):
         self._test_scenario('FR', 'CH', True, VatChargeAction.charge,
                            Decimal('8.1'), "France → Switzerland")
 
-        # Canada - B2B exempt (0%)
+        # Canada - no B2B exemption; no postal code falls back to Ontario rate (13%)
         self._test_scenario('FR', 'CA', False, VatChargeAction.charge,
-                           Decimal('0'), "France → Canada")
+                           Decimal('13'), "France → Canada")
         self._test_scenario('FR', 'CA', True, VatChargeAction.charge,
-                           Decimal('0'), "France → Canada")
+                           Decimal('13'), "France → Canada")
 
         # Norway - B2B NOT exempt (charges 25%)
         self._test_scenario('FR', 'NO', False, VatChargeAction.charge,
@@ -234,7 +234,7 @@ class FranceSellerDigitalGoodsVatRateTestCase(unittest.TestCase):
             ('FR', 'MQ', Decimal('8.5'), Decimal('8.5'), VatChargeAction.charge, "Martinique"),
             ('FR', 'EG', Decimal('14'), Decimal('0'), VatChargeAction.no_charge, "Egypt"),
             ('FR', 'CH', Decimal('8.1'), Decimal('8.1'), VatChargeAction.charge, "Switzerland"),
-            ('FR', 'CA', Decimal('0'), Decimal('0'), VatChargeAction.charge, "Canada"),
+            ('FR', 'CA', Decimal('13'), Decimal('13'), VatChargeAction.charge, "Canada"),  # Ontario fallback, no B2B exemption
             ('FR', 'NO', Decimal('25'), Decimal('25'), VatChargeAction.charge, "Norway"),
             ('FR', 'GB', Decimal('20'), Decimal('0'), VatChargeAction.reverse_charge, "Great Britain"),
         ]

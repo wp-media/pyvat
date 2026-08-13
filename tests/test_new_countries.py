@@ -8,7 +8,7 @@ from pyvat.vat_rules import VAT_RULES
 
 try:
     from unittest2 import TestCase
-except (ImportError):
+except (ImportError, AttributeError):
     from unittest import TestCase
 
 
@@ -20,7 +20,7 @@ class NewCountriesVatRulesTestCase(TestCase):
         test_cases = [
             ('EG', 'Egypt', 14),
             ('CH', 'Switzerland', 8.1),
-            ('CA', 'Canada', 0),
+            ('CA', 'Canada', 13),  # No postal code → Ontario fallback (13%)
             ('NO', 'Norway', 25),
             ('MC', 'Monaco', 20),
             ('RE', 'Réunion (DOM)', 8.5),
@@ -80,7 +80,7 @@ class NonEuB2BVatChargeTestCase(TestCase):
             # (country_code, country_name, expected_vat_rate, expected_action, description)
             ('EG', 'Egypt', Decimal('0'), VatChargeAction.no_charge, 'B2B exempt - no VAT charged'),
             ('CH', 'Switzerland', Decimal('8.1'), VatChargeAction.charge, 'B2B not exempt - VAT charged'),
-            ('CA', 'Canada', Decimal('0'), VatChargeAction.charge, 'B2B accepts VAT numbers, 0% rate applied'),
+            ('CA', 'Canada', Decimal('13'), VatChargeAction.charge, 'B2B not exempt - Ontario fallback rate (13%) applied'),
             ('NO', 'Norway', Decimal('25'), VatChargeAction.charge, 'B2B not exempt - VAT charged'),
         ]
 
@@ -115,3 +115,75 @@ class NonEuB2BVatChargeTestCase(TestCase):
                     f"VAT should be charged in {country_name} ({country_code})"
                 )
 
+
+class CanadaProvinceVatRatesTestCase(TestCase):
+    """Test Canada province-specific VAT rates based on postal code prefix."""
+
+    def test_province_rates(self):
+        """Test that the correct VAT rate is returned for each province."""
+        rules = VAT_RULES['CA']
+        item_type = ItemType.generic_electronic_service
+
+        test_cases = [
+            # (postal_code, province, expected_rate, note)
+            (None,    'No postal code (Ontario fallback)', Decimal('13'),   'fallback'),
+            ('A1A 5T9', 'Newfoundland and Labrador',      Decimal('15'),   'HST'),
+            ('B3H 1Y2', 'Nova Scotia',                    Decimal('14'),   'HST'),
+            ('C1A 4P3', 'Prince Edward Island',           Decimal('15'),   'HST'),
+            ('E2L 4H8', 'New Brunswick',                  Decimal('15'),   'HST'),
+            ('G1A 0A2', 'Quebec',                         Decimal('5'),    'not registered → GST only'),
+            ('H1A 0A1', 'Quebec',                         Decimal('5'),    'not registered → GST only'),
+            ('J1A 1A1', 'Quebec',                         Decimal('5'),    'not registered → GST only'),
+            ('K1A 0B1', 'Ontario',                        Decimal('13'),   'HST'),
+            ('L5B 4M7', 'Ontario',                        Decimal('13'),   'HST'),
+            ('M5V 3L9', 'Ontario',                        Decimal('13'),   'HST'),
+            ('N2L 3G1', 'Ontario',                        Decimal('13'),   'HST'),
+            ('P7B 5E1', 'Ontario',                        Decimal('13'),   'HST'),
+            ('R2C 0A1', 'Manitoba',                       Decimal('5'),    'not registered → GST only'),
+            ('S7K 1A1', 'Saskatchewan',                   Decimal('11'),   'GST + PST (registered)'),
+            ('T5J 0N3', 'Alberta',                        Decimal('5'),    'GST only'),
+            ('V6B 4N6', 'British Columbia',               Decimal('12'),   'GST + PST (registered)'),
+            ('X0A 0H0', 'Northwest Territories/Nunavut',  Decimal('5'),    'GST only'),
+            ('Y1A 0A1', 'Yukon',                          Decimal('5'),    'GST only'),
+        ]
+
+        for postal_code, province, expected_rate, note in test_cases:
+            with self.subTest(province=province, postal_code=postal_code):
+                rate = rules.get_vat_rate(item_type, postal_code)
+                self.assertEqual(
+                    rate,
+                    expected_rate,
+                    f"{province} ({postal_code!r}) should be {expected_rate}% — {note}"
+                )
+
+    def test_b2b_no_exemption(self):
+        """Test that B2B transactions are charged the same rate as B2C."""
+        test_cases = [
+            ('V6B 4N6', Decimal('12'),  'British Columbia'),
+            ('S7K 1A1', Decimal('11'),  'Saskatchewan'),
+            ('K1A 0B1', Decimal('13'),  'Ontario'),
+            ('A1A 5T9', Decimal('15'),  'Newfoundland and Labrador'),
+            ('G1A 0A2', Decimal('5'),   'Quebec (not registered)'),
+            ('R2C 0A1', Decimal('5'),   'Manitoba (not registered)'),
+            (None,      Decimal('13'),  'No postal code (Ontario fallback)'),
+        ]
+
+        for postal_code, expected_rate, province in test_cases:
+            with self.subTest(province=province):
+                vat_charge = get_sale_vat_charge(
+                    datetime.date(2024, 1, 1),
+                    ItemType.generic_electronic_service,
+                    Party(country_code='CA', is_business=True),
+                    Party(country_code='FR', is_business=True),
+                    postal_code=postal_code,
+                )
+                self.assertEqual(
+                    vat_charge.action,
+                    VatChargeAction.charge,
+                    f"{province}: B2B should still be charged VAT"
+                )
+                self.assertEqual(
+                    vat_charge.rate,
+                    expected_rate,
+                    f"{province}: B2B rate should match B2C rate ({expected_rate}%)"
+                )
