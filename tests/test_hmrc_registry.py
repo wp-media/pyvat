@@ -16,6 +16,7 @@ except (ImportError):
 
 from requests import Timeout
 
+from pyvat.exceptions import ServerError
 from pyvat.registries import HMRCRegistry
 
 
@@ -55,17 +56,27 @@ class HMRCRegistryTestCase(TestCase):
         self.assertIn('not found', log_text.lower())
 
     @patch('pyvat.registries.requests.get')
-    def test_500_is_still_reported_as_outage(self, mock_get):
-        """A 500 (genuine outage) must still be flagged as nondeterministic."""
+    def test_400_is_not_reported_as_outage(self, mock_get):
+        """A 400 is an authoritative bad request, not a service outage."""
         mock_get.return_value = _make_response(
-            500, text='Internal Server Error'
+            400, text='{"code": "INVALID_VAT_NUMBER"}'
         )
 
         result = self.registry.check_vat_number('123456789', 'GB', False)
 
         self.assertFalse(result.is_valid)
         log_text = '\n'.join(result.log_lines)
-        self.assertIn('nondeterministic', log_text)
+        self.assertNotIn('nondeterministic', log_text)
+
+    @patch('pyvat.registries.requests.get')
+    def test_500_raises_server_error(self, mock_get):
+        """A 500 (genuine outage) must raise ServerError."""
+        mock_get.return_value = _make_response(
+            500, text='Internal Server Error'
+        )
+
+        with self.assertRaises(ServerError):
+            self.registry.check_vat_number('123456789', 'GB', False)
 
     @patch('pyvat.registries.requests.get')
     def test_200_with_valid_target_returns_valid_result(self, mock_get):
@@ -93,17 +104,14 @@ class HMRCRegistryTestCase(TestCase):
         self.assertIn('131B Barton Hamlet', result.business_address)
 
     @patch('pyvat.registries.requests.get')
-    def test_malformed_content_type_is_reported_as_outage(self, mock_get):
-        """A 200 response with a non-JSON content type is still nondeterministic."""
+    def test_malformed_content_type_raises_server_error(self, mock_get):
+        """A 200 response with a non-JSON content type is a service outage."""
         mock_get.return_value = _make_response(
             200, content_type='text/html', text='<html>not json</html>'
         )
 
-        result = self.registry.check_vat_number('123456789', 'GB', False)
-
-        self.assertFalse(result.is_valid)
-        log_text = '\n'.join(result.log_lines)
-        self.assertIn('nondeterministic', log_text)
+        with self.assertRaises(ServerError):
+            self.registry.check_vat_number('123456789', 'GB', False)
 
     def test_default_timeout(self):
         """The default timeout matches the documented class default."""
@@ -134,12 +142,17 @@ class HMRCRegistryTestCase(TestCase):
         self.assertEqual(mock_get.call_args.kwargs['timeout'], 30)
 
     @patch('pyvat.registries.requests.get')
-    def test_timeout_is_reported_as_outage(self, mock_get):
-        """A request timeout must still be flagged so outage detection works."""
+    def test_timeout_raises_server_error(self, mock_get):
+        """A request timeout must raise ServerError so outage detection works."""
         mock_get.side_effect = Timeout('connection timed out')
 
-        result = self.registry.check_vat_number('123456789', 'GB', False)
+        with self.assertRaises(ServerError):
+            self.registry.check_vat_number('123456789', 'GB', False)
 
-        self.assertFalse(result.is_valid)
-        log_text = '\n'.join(result.log_lines)
-        self.assertIn('timed out', log_text.lower())
+    @patch('pyvat.registries.requests.get')
+    def test_generic_request_exception_raises_server_error(self, mock_get):
+        """An unexpected exception during the request must raise ServerError."""
+        mock_get.side_effect = ValueError('boom')
+
+        with self.assertRaises(ServerError):
+            self.registry.check_vat_number('123456789', 'GB', False)
