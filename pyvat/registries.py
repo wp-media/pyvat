@@ -147,12 +147,11 @@ class ViesRegistry(Registry):
         except Timeout as e:
             result.log_lines.append(u'< Request to EU VIEW registry timed out:'
                                     u' {}'.format(e))
-            return result
+            raise ServerError(u'VIES request timed out: {}'.format(e))
         except Exception as exception:
-            # Do not completely fail problematic requests.
             result.log_lines.append(u'< Request failed with exception: %r' %
                                     (exception))
-            return result
+            raise ServerError(u'VIES request failed: {}'.format(exception))
 
         # Log response information.
         result.log_lines += [
@@ -161,13 +160,16 @@ class ViesRegistry(Registry):
             response.text,
         ]
 
-        # Do not completely fail problematic requests.
         if response.status_code != 200 or \
                 not response.headers['Content-Type'].startswith('text/xml'):
             result.log_lines.append(u'< Response is nondeterministic due to '
                                     u'invalid response status code or MIME '
                                     u'type')
-            return result
+            raise ServerError(
+                u'VIES returned an unexpected response: status {}'.format(
+                    response.status_code
+                )
+            )
 
         # Parse the DOM and validate as much as we can.
         #
@@ -309,12 +311,11 @@ class HMRCRegistry(Registry):
         except Timeout as e:
             result.log_lines.append(u'< Request to HMRC registry timed out:'
                                     u' {}'.format(e))
-            return result
+            raise ServerError(u'HMRC request timed out: {}'.format(e))
         except Exception as exception:
-            # Do not completely fail problematic requests.
             result.log_lines.append(u'< Request failed with exception: %r' %
                                     (exception))
-            return result
+            raise ServerError(u'HMRC request failed: {}'.format(exception))
 
         # Log response information.
         result.log_lines += [
@@ -323,20 +324,23 @@ class HMRCRegistry(Registry):
             response.text,
         ]
 
-        # A 404 from HMRC means the VAT number was not found in the
-        # registry. This is a deterministic negative result, not a
-        # service outage, so it must not be treated as nondeterministic.
-        if response.status_code == 404:
-            result.log_lines.append(u'< VAT number not found (404 NOT_FOUND)')
+        # A 404/400 from HMRC means the VAT number was not found/invalid.
+        # This is a deterministic negative result, not a service outage.
+        if response.status_code in (400, 404):
+            result.log_lines.append(u'< VAT number not found (%d)' %
+                                    (response.status_code))
             return result
 
-        # Do not completely fail problematic requests.
         if response.status_code != 200 or \
                 not response.headers['Content-Type'].startswith('application/json'):
             result.log_lines.append(u'< Response is nondeterministic due to '
                                     u'invalid response status code or MIME '
                                     u'type')
-            return result
+            raise ServerError(
+                u'HMRC returned an unexpected response: status {}'.format(
+                    response.status_code
+                )
+            )
 
         # Parse the DOM and validate as much as we can.
         #

@@ -13,6 +13,7 @@ except (ImportError):
 
 from requests import Timeout
 
+from pyvat.exceptions import ServerError
 from pyvat.registries import ViesRegistry
 
 
@@ -95,13 +96,44 @@ class ViesRegistryTimeoutTestCase(TestCase):
         self.assertEqual(result.business_country_code, 'DK')
 
     @patch('pyvat.registries.requests.post')
-    def test_timeout_is_logged_and_does_not_raise(self, mock_post):
-        """A genuine timeout is still logged without raising."""
+    def test_timeout_raises_server_error(self, mock_post):
+        """A genuine timeout must raise ServerError so outage detection works."""
         mock_post.side_effect = Timeout('connection timed out')
 
         registry = ViesRegistry()
-        result = registry.check_vat_number('47458714', 'DK', False)
+        with self.assertRaises(ServerError):
+            registry.check_vat_number('47458714', 'DK', False)
 
-        self.assertIsNone(result.is_valid)
-        log_text = '\n'.join(result.log_lines)
-        self.assertIn('timed out', log_text.lower())
+    @patch('pyvat.registries.requests.post')
+    def test_generic_request_exception_raises_server_error(self, mock_post):
+        """An unexpected exception during the request must raise ServerError."""
+        mock_post.side_effect = ValueError('boom')
+
+        registry = ViesRegistry()
+        with self.assertRaises(ServerError):
+            registry.check_vat_number('47458714', 'DK', False)
+
+    @patch('pyvat.registries.requests.post')
+    def test_non_200_response_raises_server_error(self, mock_post):
+        """A non-200 response is a service outage, not an authoritative result."""
+        mock_post.return_value = _make_response(status_code=503, text='')
+
+        registry = ViesRegistry()
+        with self.assertRaises(ServerError):
+            registry.check_vat_number('47458714', 'DK', False)
+
+    @patch('pyvat.registries.requests.post')
+    def test_soap_fault_raises_server_error(self, mock_post):
+        """A SOAP env:Fault (e.g. MS_UNAVAILABLE) must raise ServerError."""
+        fault_xml = (
+            u'<env:Envelope xmlns:env="http://schemas.xmlsoap.org/soap/envelope/">'
+            u'<env:Header/><env:Body><env:Fault>'
+            u'<faultcode>env:Server</faultcode>'
+            u'<faultstring>MS_UNAVAILABLE</faultstring>'
+            u'</env:Fault></env:Body></env:Envelope>'
+        )
+        mock_post.return_value = _make_response(text=fault_xml)
+
+        registry = ViesRegistry()
+        with self.assertRaises(ServerError):
+            registry.check_vat_number('47458714', 'DK', False)
